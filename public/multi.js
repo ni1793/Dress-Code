@@ -179,7 +179,8 @@
     else if(busy){
       const summary=room.roundSummary;
       key.textContent=summary?.tied?`第 ${room.round} 輪最高票平手！全員重抽 ${CATEGORIES[cat]}。`:`最多票：${summary?.winner?.option?.[1]||''}，接下來進入下一項。`;
-    }else key.textContent=`${CATEGORIES[cat]}：${spinsDone}／${room.players.length} 人已完成${pending?'（有人正在轉盤）':''}。${done?'請等待大家抽完。':'這一輪你只能    // Preserve each player's actual roll. Identical values receive identical
+    }else key.textContent=`${CATEGORIES[cat]}：${spinsDone}／${room.players.length} 人已完成${pending?'（有人正在轉盤）':''}。${done?'請等待大家抽完。':'這一輪你只能抽一次。'}`;
+    // Preserve each player's actual roll. Identical values receive identical
     // match colors, while independently rolled values always stay visible.
     const matchColors=[
       {bg:'#ffe2f1',border:'#f04aa0',ink:'#842450'},
@@ -223,8 +224,6 @@
     });
     const note=createEl('div','multi-match-note','同色底表示抽到同款；每個人的結果都會保留，最終穿搭另由票選決定。');
     table.append(note);
-
-    });
     // Same on-page result ticket, actions, text and image exporter as the solo game.
     const ticket=$('#multi-ticket');ticket.hidden=!isFinish;
     $('#multi-copy').disabled=!isFinish;$('#multi-save').disabled=!isFinish;
