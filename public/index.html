@@ -565,7 +565,22 @@ body::after,.stage::after{display:none !important;content:none !important}
 @media(max-width:370px){.multi-title h2{font-size:29px}.multi-team-head,.multi-team-row{grid-template-columns:minmax(75px,1.1fr) repeat(3,minmax(0,1fr));padding:8px 4px}.multi-progress{gap:5px}.multi-pick{font-size:10px}}
 
 </style>
-</head>
+<style id="multi-shared-ticket">
+.stage.is-multi #multi-ticket{display:block !important;margin:21px 0 12px;background:linear-gradient(180deg,#eff0f5,#dfe3eb);border:3px solid #fff;border-radius:25px;box-shadow:0 8px 0 #9199a9,0 0 0 2px #838b9b}
+.stage.is-multi #multi-ticket[hidden]{display:none !important}
+#multi-ticket .ticket-top{background:#ff4fb1;color:#fff;border-bottom:5px dashed #15151e}
+#multi-ticket .ticket-title{color:#c12d81}
+#multi-ticket .result{color:#20222c;text-shadow:none;font-weight:950}
+#multi-ticket .detail{color:#586073}
+#multi-ticket .ticket-actions button{border:2px solid #20212a;border-radius:12px}
+#multi-ticket .ticket-actions button:first-child{background:#ddd1ff;color:#171620}
+#multi-ticket .ticket-actions button:last-child{background:#60d9d8;color:#171620}
+.multi-pick{cursor:default}
+.multi-pick.locked{background:#d8fb7b}
+.multi-pick.current{background:#ff8cca;box-shadow:0 0 0 3px #f44aac,0 6px 0 #bf2782}
+.multi-pick.upcoming{opacity:.52}
+.multi-round-status{font-size:12px;font-weight:850;line-height:1.5;color:#252735;padding:9px 12px;background:#fff7cf;border-radius:13px;margin-top:8px}
+</style></head>
 <body>
 <div class="stage">
  <div class="mode-switch" role="tablist" aria-label="遊戲模式"><button type="button" id="solo-mode" class="active" aria-selected="true">單機模式</button><button type="button" id="multi-mode" aria-selected="false">多人連線</button></div>
@@ -578,7 +593,7 @@ body::after,.stage::after{display:none !important;content:none !important}
   <div class="topbar"><div>LUCKY ✳ CLUB</div><div class="right"><button class="speaker" id="sound" aria-label="切換音效" aria-pressed="true" title="音效開啟／關閉（開啟時有試聽）"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 14h4l5 4V6l-5 4H4z" fill="#fffaf0" stroke="#161616" stroke-width="1.3" stroke-linejoin="round"/><path d="M16 8.5c1.8 1.5 1.8 5.5 0 7" fill="none" stroke="#fffaf0" stroke-width="1.8" stroke-linecap="round"/><path d="M18.7 6c3.3 2.8 3.3 10.2 0 13" fill="none" stroke="#fffaf0" stroke-width="1.6" stroke-linecap="round"/></svg></button></div></div>
   
 <section class="multiplayer-view" id="multiplayer-view" aria-label="多人連線房間">
-  <div class="multi-title"><span class="micro">LUCKY FIT CLUB · ONLINE</span><h2>一起抽到一樣！</h2><p class="sub">每人一色・一次一欄・三欄全員一致就成功</p></div>
+  <div class="multi-title"><span class="micro">LUCKY CLUB · ONLINE</span><h2>一起抽到一樣！</h2><p class="sub">每人一色・全員抽完才揭曉・平手全員重抽</p></div>
   <div id="multi-entry" class="multi-panel">
     <div class="multi-tabs"><button type="button" id="choose-create" class="on">建立房間</button><button type="button" id="choose-join">加入房間</button></div>
     <form id="multi-form">
@@ -602,9 +617,15 @@ body::after,.stage::after{display:none !important;content:none !important}
     <div id="multi-play-area" hidden>
       <div id="multi-progress" class="multi-progress"></div>
       <div class="multi-single-reel"><div class="multi-current-label" id="multi-reel-label">目前抽選 · 主題</div><div class="multi-reel-face" id="multi-reel-face"><span class="icon" id="multi-icon"></span><strong id="multi-item-name">準備抽選</strong><small id="multi-item-en">READY</small></div><button class="multi-spin" id="multi-spin" type="button">SPIN</button></div>
-      <p id="multi-key" class="multi-key">選擇一欄，按 SPIN 就只抽那一欄</p>
-      <div class="multi-panel"><h3>大家抽到什麼？</h3><div id="multi-team" class="multi-team-table"></div><p class="multi-help">同頻加成：已有隊友結果的欄位，有 65% 機率抽到目前最多人持有的選項。全員同欄一致時會自動鎖定。</p></div>
-      <div id="multi-winning" class="multi-winning" hidden></div>
+      <p id="multi-key" class="multi-key">依序抽主題、配色、小物；每輪每人只能抽一次</p>
+      <div class="multi-panel"><h3>大家抽到什麼？</h3><div id="multi-team" class="multi-team-table"></div><p class="multi-help">每人每輪各抽一次，等全員完成後統計票數；最高票唯一選項勝出，最高票平手則全員重抽。各人的抽選機率完全相同。</p></div>
+      <section class="ticket" id="multi-ticket" aria-live="polite" hidden>
+        <div class="ticket-top"><span>✳ TODAY'S OUTFIT ♡</span><span id="multi-serial">ROOM ---</span></div>
+        <div class="ticket-title">抽出來的是...</div>
+        <div class="result" id="multi-result">這局的穿搭即將揭曉！</div>
+        <div class="detail" id="multi-detail">全員完成主題、配色、小物的抽選後就會顯示。</div>
+        <div class="ticket-actions"><button id="multi-copy" disabled>複製結果 ↗</button><button id="multi-save" disabled>下載穿搭卡 ↗</button></div>
+      </section>
     </div>
   </div>
 </section>
@@ -645,12 +666,12 @@ const lists=[
   [['feather','羽毛單品','Feathers'],['crown','荒謬皇冠','A crown'],['lipstick','超紅口紅','Red lipstick'],['glovePop','彩色手套','Color gloves'],['hairclip','誇張髮飾','Hair accessory'],['sparkleBadge','閃亮貼紙','Shiny stickers'],['oddSocks','不對稱襪','Mismatched socks'],['weirdBag','奇怪形狀包','Funny bag'],['bigGlasses','超大墨鏡','Big sunglasses'],['statementGems','浮誇飾品','Statement gems']]
  ]
 ];
-/* LUCKY FIT CLUB — original miniature illustration system.
+/* LUCKY CLUB — original miniature illustration system.
    All images are self-contained SVG drawn specifically for this game. */
-/* LUCKY FIT CLUB — original Plump Flat icon system.
+/* LUCKY CLUB — original Plump Flat icon system.
    Made for this game: solid plump silhouettes, zero emoji, no icon library,
    punchy colors, playful black accents, instantly readable at 45–60px. */
-/* Lucky Fit Club — 75 original Plump Flat icons, redrawn for the actual clothing prompts.
+/* Lucky Club — 75 original Plump Flat icons, redrawn for the actual clothing prompts.
    Intentional flat silhouettes, no tile, bevel, glass, outlines, emoji or icon font. */
 const PF={ink:'#141419',pink:'#FF83B8',pink2:'#FA5F9E',orange:'#FF7D50',yellow:'#FFC83C',lime:'#77E158',blue:'#44C4F3',deep:'#2673D9',purple:'#B38BFA',cream:'#FFF5E5',white:'#FFFFFF',grey:'#B5B6B9',brown:'#966044',wine:'#9D3A5A',mint:'#A0EDDC',lavender:'#D7B6FC'};
 const solidPaint=(color)=>{const pairs={};Object.keys(PF).forEach(k=>pairs[PF[k].toUpperCase()]='paint-'+k);return pairs[String(color).toUpperCase()]?'url(#'+pairs[String(color).toUpperCase()]+')':color};
@@ -775,7 +796,7 @@ const swatchColors={
 function plumpIcon(key){const colors=swatchColors[key];return svg(colors?textile(...colors):(individualIcons[key]||individualIcons.blank)());}
 
 const __plumpIconRaw=plumpIcon; const __iconCache=new Map(); plumpIcon=(key)=>{if(!__iconCache.has(key))__iconCache.set(key,__plumpIconRaw(key));return __iconCache.get(key)};
-window.LuckyFitIcon = plumpIcon;
+window.LuckyClubIcon = window.LuckyFitIcon = plumpIcon;
 const blankValue=['blank','尚未抽選','READY'];
 const state={mode:0,held:[false,false,false],values:[blankValue,blankValue,blankValue],playing:false,spins:0,sound:true,ready:false};
 const reelEls=[0,1,2].map(i=>$('#reel'+i));const holds=$$('[data-hold]');
@@ -884,10 +905,7 @@ function resetAll(){
   state.mode=0;state.spins=0;state.ready=false;
   state.values=[blankValue,blankValue,blankValue];
   $$('[data-mode]').forEach(b=>{const selected=Number(b.dataset.mode)===0;b.classList.toggle('selected',selected);b.setAttribute('aria-pressed',String(selected))});
-  const leverControl=$('.control');
-$('#spin').addEventListener('click',()=>{leverControl.classList.remove('lever-pulled');void leverControl.offsetWidth;leverControl.classList.add('lever-pulled');setTimeout(()=>leverControl.classList.remove('lever-pulled'),440)});
-renderSoundButton();
-for(let i=0;i<3;i++)setBlank(i);
+  for(let i=0;i<3;i++)setBlank(i);
   $('#rounds').textContent='SPIN # 000';$('#serial').textContent='NO. 000';
   $('#result').textContent='今天穿什麼？交給命運！';
   $('#detail').textContent='按下 SPIN，抽出主題 × 配色 × 小物。';
@@ -901,90 +919,104 @@ $$('[data-mode]').forEach(b=>b.addEventListener('click',()=>{if(state.playing)re
 $('#sound').addEventListener('click',()=>{state.sound=!state.sound;if(!state.sound)stopRollSound();else if(state.playing)startRollSound();else playSfx(winAudio);renderSoundButton();showToast(state.sound?'音效開啟':'音效關閉')});
 function resultText(){return '🎲 好運 Dress Code 拉霸 🎲\n主題：'+state.values[0][1]+'\n配色：'+state.values[1][1]+'\n指定小物：'+state.values[2][1]+'\n\n我們一起穿這個！♡'}
 $('#copy').addEventListener('click',async()=>{if(!state.ready)return;try{await navigator.clipboard.writeText(resultText());showToast('已複製！貼給朋友就可以 ♡')}catch(e){const ta=document.createElement('textarea');ta.value=resultText();document.body.appendChild(ta);ta.select();try{document.execCommand('copy');showToast('已複製 ♡')}catch(e){showToast('可以直接截圖分享 ♡')}ta.remove()}});
-function wrapText(ctx,text,maxWidth){const out=[];let current='';for(const char of text){if(ctx.measureText(current+char).width>maxWidth&&current){out.push(current);current=char}else current+=char}if(current)out.push(current);return out}
-function roundedRect(ctx,x,y,w,h,r){const rr=Math.min(r,w/2,h/2);ctx.beginPath();ctx.moveTo(x+rr,y);ctx.arcTo(x+w,y,x+w,y+h,rr);ctx.arcTo(x+w,y+h,x,y+h,rr);ctx.arcTo(x,y+h,x,y,rr);ctx.arcTo(x,y,x+w,y,rr);ctx.closePath()}
-function wrapLines(ctx,text,maxWidth){const chars=[...(text||'')];const lines=[];let line='';for(const ch of chars){const test=line+ch;if(ctx.measureText(test).width>maxWidth&&line){lines.push(line);line=ch}else line=test}if(line)lines.push(line);return lines}
-function drawMultiLine(ctx,text,x,y,maxWidth,lineHeight,maxLines=99){const lines=wrapLines(ctx,text,maxWidth).slice(0,maxLines);lines.forEach((line,i)=>ctx.fillText(line,x,y+i*lineHeight));return lines.length}
-function outfitCardCanvas(){
-  const canvas=document.createElement('canvas');canvas.width=1080;canvas.height=1350;const c=canvas.getContext('2d');
-  const ink='#121319',pink='#ff5dbd',pinkDeep='#d92e91',green='#c4ef2a',cyan='#65d8f4',grey1='#ebedf2',grey2='#c3c8d3',black='#0c0d12',white='#fff';
-  const topSpans=$$('.ticket-top span');
-  const topLeft=(topSpans[0]?.textContent||"TODAY'S OUTFIT").trim();
-  const serial=($('#serial')?.textContent||('NO. '+String(state.spins).padStart(3,'0'))).trim();
-  const ticketTitle=($('.ticket-title')?.textContent||'抽出來的是...').trim();
-  const result=($('#result')?.textContent||'').trim();
-  const detail=($('#detail')?.textContent||'').trim();
-  const footer=($('.footer')?.textContent||'').trim();
-  const labels=$$('.head-row .head').map(el=>el.textContent.replace(/\s+/g,' ').trim().split(' ').pop()).slice(0,3);
-  const values=[state.values[0]?.[1]||'',state.values[1]?.[1]||'',state.values[2]?.[1]||''];
-
-  c.fillStyle='#ff54bc';c.fillRect(0,0,canvas.width,canvas.height);
-  c.fillStyle='#ff7dcd';c.fillRect(0,0,canvas.width,120);
-  roundedRect(c,120,78,840,1180,46);c.fillStyle='#838c9e';c.fill();
-  roundedRect(c,112,68,840,1180,46);c.fillStyle=grey1;c.fill();
-  c.lineWidth=6;c.strokeStyle=white;roundedRect(c,112,68,840,1180,46);c.stroke();
-  c.fillStyle=pink;roundedRect(c,170,98,724,112,34);c.fill();
-  c.fillStyle=white;roundedRect(c,425,90,230,68,34);c.fill();
-  c.fillStyle='#bf2f84';c.font='900 38px system-ui';c.textAlign='center';c.textBaseline='middle';c.fillText('LUCKY FIT CLUB',540,124);
-  c.font='900 26px system-ui';c.fillText('staff',540,124);
-  c.fillStyle=green;c.beginPath();c.moveTo(180,96);c.lineTo(210,96);c.lineTo(228,290);c.lineTo(196,290);c.closePath();c.fill();
-  c.beginPath();c.moveTo(900,96);c.lineTo(870,96);c.lineTo(852,290);c.lineTo(884,290);c.closePath();c.fill();
-  roundedRect(c,206,218,668,408,28);c.fillStyle=black;c.fill();c.lineWidth=6;c.strokeStyle='#1b1d24';c.stroke();
-  c.shadowColor='rgba(255,255,255,.22)';c.shadowBlur=28;c.fillStyle='#ff6ac3';c.beginPath();c.arc(540,356,88,0,Math.PI*2);c.fill();c.shadowBlur=0;
-  c.fillStyle='#f445aa';c.font='900 134px system-ui';c.fillText('?',540,374);
-  c.strokeStyle=white;c.lineWidth=8;c.lineCap='round';c.beginPath();c.moveTo(310,356);c.lineTo(350,316);c.moveTo(310,356);c.lineTo(350,396);c.moveTo(770,356);c.lineTo(730,316);c.moveTo(770,356);c.lineTo(730,396);c.stroke();
-  roundedRect(c,322,452,436,64,22);c.fillStyle='#111';c.fill();c.lineWidth=3;c.strokeStyle=white;c.stroke();
-  c.fillStyle=white;c.font='900 25px monospace';c.fillText('confirm outfit',540,485);
-  c.font='900 18px monospace';c.textAlign='left';c.fillText('▷ start',278,548);c.textAlign='right';c.fillText('exit',802,548);
-  c.fillStyle='#f06fbb';roundedRect(c,112,630,840,310,0);c.fill();
-  c.fillStyle=white;c.beginPath();c.arc(250,784,38,0,Math.PI*2);c.fill();
-  c.fillStyle='#101015';c.fillRect(243,706,15,86);
-  c.fillStyle='#f84f9c';c.beginPath();c.arc(250,684,34,0,Math.PI*2);c.fill();
-  c.fillStyle='#790a49';c.beginPath();c.arc(238,672,7,0,Math.PI*2);c.fill();
-  const btns=[[477,741,pink],[590,741,green],[703,741,pink],[534,806,green],[647,806,pink],[760,806,green]];
-  btns.forEach(([x,y,col])=>{c.fillStyle='rgba(0,0,0,.17)';c.beginPath();c.ellipse(x+3,y+10,34,9,0,0,Math.PI*2);c.fill();c.fillStyle=col;c.beginPath();c.ellipse(x,y,22,15,0,0,Math.PI*2);c.fill();c.fillStyle='rgba(255,255,255,.35)';c.beginPath();c.ellipse(x-5,y-5,10,5,0,0,Math.PI*2);c.fill();});
-  roundedRect(c,430,876,178,122,16);c.fillStyle='#111';c.fill();c.lineWidth=3;c.strokeStyle=grey2;c.stroke();
-  c.fillStyle=pink;roundedRect(c,487,910,46,55,10);c.fill();
-  c.fillStyle=green;c.beginPath();c.arc(450,910,9,0,Math.PI*2);c.arc(588,910,9,0,Math.PI*2);c.arc(450,964,9,0,Math.PI*2);c.arc(588,964,9,0,Math.PI*2);c.fill();
-  c.fillStyle='#bf2f84';c.font='900 30px system-ui';c.textAlign='left';c.fillText(ticketTitle,152,1018);
-  c.fillStyle='#bf2f84';c.font='700 19px system-ui';c.fillText(topLeft,154,1054);c.textAlign='right';c.fillText(serial,910,1054);c.textAlign='left';
-  roundedRect(c,150,1068,764,134,26);c.fillStyle=white;c.fill();c.lineWidth=4;c.strokeStyle=grey2;c.stroke();
-  c.fillStyle=ink;c.font='900 44px system-ui';const resLines=wrapLines(c,result,700).slice(0,2);resLines.forEach((line,i)=>c.fillText(line,178,1126+i*50));
-  c.fillStyle='#666b77';c.font='700 22px system-ui';const detailLines=wrapLines(c,detail,680).slice(0,2);detailLines.forEach((line,i)=>c.fillText(line,178,1180+i*30));
-  const colors=[pink,cyan,green];
-  labels.forEach((label,i)=>{const x=160+i*252,y=1230;roundedRect(c,x,y,228,72,18);c.fillStyle=colors[i];c.fill();c.fillStyle=ink;c.font='900 20px system-ui';c.fillText(label||['主題','配色','小物'][i],x+18,y+28);c.fillStyle=ink;c.font='900 28px system-ui';const t=values[i]||'';const lines=wrapLines(c,t,190).slice(0,2);lines.forEach((line,j)=>c.fillText(line,x+18,y+56+j*24));});
-  c.fillStyle='#ffe8f6';c.font='800 20px system-ui';c.textAlign='center';c.fillText(footer,540,1322);
-  return canvas;
+// Shared ticket export used by both solo and multiplayer, matching the in-game result ticket.
+const CLUB_COLORS={pink:'#ff4fb1',pink2:'#ff8bd3',lime:'#cdff42',cyan:'#65d9e0',ink:'#15151e',silver:'#e5e8ef',slate:'#687386',white:'#ffffff'};
+function clubRoundRect(ctx,x,y,w,h,r,fill,stroke,line=0){
+  ctx.beginPath();ctx.roundRect(x,y,w,h,r);if(fill){ctx.fillStyle=fill;ctx.fill()}if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=line||2;ctx.stroke()}
 }
-function canvasToBlob(canvas){return new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('canvas toBlob failed')),'image/png'))}
+function clubWrap(ctx,phrase,width){const rows=[];let t='';for(const ch of phrase){if(ctx.measureText(t+ch).width>width&&t){rows.push(t);t=ch}else t+=ch}if(t)rows.push(t);return rows}
+async function clubDrawSVG(ctx,markup,x,y,w,h){
+  if(!markup)return;
+  try{
+    const blob=new Blob([markup],{type:'image/svg+xml;charset=utf-8'});
+    const url=URL.createObjectURL(blob);const img=new Image();
+    await new Promise((done,fail)=>{img.onload=done;img.onerror=fail;img.src=url;});
+    ctx.drawImage(img,x,y,w,h);URL.revokeObjectURL(url);
+  }catch(err){/* text and color remain visible if SVG loading is unavailable */}
+}
+async function clubCardCanvas(data){
+  if(document.fonts?.ready)await document.fonts.ready;
+  const cvs=document.createElement('canvas');cvs.width=1080;cvs.height=1350;
+  const c=cvs.getContext('2d');const {pink,pink2,lime,cyan,ink,silver,slate,white}=CLUB_COLORS;
+  const rows=[data.theme,data.color,data.accessory];
+  const k=['THEME','COLOR','ACCESSORY'];const labels=['主題','配色','小物'];
+  const accent=[pink,cyan,lime];
+  // Backing, metallic cabinet trim and arcade neon linework
+  const bg=c.createLinearGradient(0,0,1080,1350);bg.addColorStop(0,'#d7dce6');bg.addColorStop(.53,'#f0f1f5');bg.addColorStop(1,'#aeb5c3');c.fillStyle=bg;c.fillRect(0,0,1080,1350);
+  c.fillStyle=pink;c.fillRect(0,0,1080,25);c.fillStyle=lime;c.fillRect(0,25,1080,12);
+  clubRoundRect(c,73,97,946,1168,45,'#8a91a0');
+  clubRoundRect(c,61,79,946,1168,45,'#fbfbfe','#ffffff',8);
+  clubRoundRect(c,70,88,926,1149,42,'#e7e9ef','#a4abb8',3);
+  clubRoundRect(c,89,107,888,1096,36,ink,pink,13);
+  clubRoundRect(c,102,119,862,1070,31,null,lime,8);
+  // Header marquee
+  clubRoundRect(c,127,145,826,196,24,'#ff4db5');
+  const bar=c.createLinearGradient(0,145,0,341);bar.addColorStop(0,'#ff90d3');bar.addColorStop(.28,'#ff57b9');bar.addColorStop(1,'#ee2b91');clubRoundRect(c,136,154,808,177,20,bar);
+  c.fillStyle=white;c.font='900 56px system-ui, sans-serif';c.textAlign='center';c.fillText('LUCKY CLUB',540,244);
+  c.fillStyle=lime;c.font='900 23px system-ui, sans-serif';c.fillText('✦  TODAY’S OUTFIT  ✦',540,292);
+  // real result card uses same ticket shape, top bar and dashed cut line
+  clubRoundRect(c,127,367,826,714,31,'#ffffff');
+  c.save();c.beginPath();c.roundRect(127,367,826,714,31);c.clip();
+  c.fillStyle=pink;c.fillRect(127,367,826,95);
+  c.restore();
+  c.setLineDash([12,9]);c.strokeStyle=ink;c.lineWidth=4;c.beginPath();c.moveTo(132,463);c.lineTo(948,463);c.stroke();c.setLineDash([]);
+  c.fillStyle=white;c.font='900 26px system-ui, sans-serif';c.textAlign='left';c.fillText('✳ TODAY’S OUTFIT ♡',154,425);
+  c.textAlign='right';c.fillText(data.serial||'NO. 001',919,425);
+  c.textAlign='left';c.fillStyle='#bb3380';c.font='900 28px system-ui, sans-serif';c.fillText('抽出來的是...',165,522);
+  c.fillStyle=ink;c.font='900 48px system-ui, sans-serif';
+  const headline=data.theme[1]+' × '+data.color[1];clubWrap(c,headline,734).slice(0,2).forEach((t,i)=>c.fillText(t,165,586+i*58));
+  c.fillStyle='#525968';c.font='700 25px system-ui, sans-serif';c.fillText('指定小物：'+data.accessory[1],165,684);
+  // Three iconic color coded tickets with original illustrator assets.
+  for(let i=0;i<3;i++){
+    const y=734+i*102;clubRoundRect(c,155,y,765,88,19,'#f2f4f9','#ccd2dd',2);
+    clubRoundRect(c,162,y+7,134,74,15,accent[i]);
+    c.fillStyle=ink;c.font='900 25px system-ui, sans-serif';c.fillText(labels[i],191,y+53);
+    if(data.iconKeys && data.iconKeys[i]&&window.LuckyClubIcon)await clubDrawSVG(c,window.LuckyClubIcon(data.iconKeys[i]),313,y+6,94,72);
+    c.fillStyle=ink;c.font='900 31px system-ui, sans-serif';c.fillText(rows[i][1],412,y+53);
+    c.fillStyle=slate;c.font='800 17px system-ui, sans-serif';c.textAlign='right';c.fillText(k[i],897,y+53);c.textAlign='left';
+  }
+  clubRoundRect(c,127,1104,826,90,21,lime);
+  c.fillStyle=ink;c.textAlign='center';c.font='900 34px system-ui, sans-serif';c.fillText('我們一起穿這個！♡',540,1160);
+  c.fillStyle='#646a79';c.font='700 19px system-ui, sans-serif';c.fillText('LUCKY CLUB · DRESS CODE GAME',540,1293);
+  return cvs;
+}
+function clubOpenPreview(){
+  const ios=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  if(!ios)return null;
+  try{const popup=window.open('about:blank','_blank');if(popup){popup.document.title='LUCKY CLUB 圖片儲存';popup.document.body.style.cssText='font:16px system-ui;text-align:center;padding:24px;background:#f6f3f8;color:#252535';popup.document.body.textContent='正在製作穿搭卡…';}return popup;}catch(e){return null;}
+}
+async function clubSaveImage(data,previewWin=null){
+  const canvas=await clubCardCanvas(data);
+  const blob=await new Promise((res,rej)=>canvas.toBlob(b=>b?res(b):rej(new Error('無法產生穿搭卡')),'image/png'));
+  const name='LUCKY_CLUB_'+(data.serial||'OUTFIT').replace(/[^a-zA-Z0-9_]/g,'_')+'.png';
+  const ios=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  const url=URL.createObjectURL(blob);
+  if(previewWin && !previewWin.closed){previewWin.location.href=url;setTimeout(()=>URL.revokeObjectURL(url),120000);return '圖片已開啟，長按圖片即可儲存';}
+  if(ios&&navigator.share&&typeof File==='function'){
+    try{
+      const file=new File([blob],name,{type:'image/png'});
+      if(!navigator.canShare||navigator.canShare({files:[file]})){await navigator.share({files:[file],title:'LUCKY CLUB'});return '已開啟分享，請選擇儲存圖片';}
+    }catch(e){if(e.name==='AbortError')return '已取消儲存';}
+  }
+  const a=document.createElement('a');a.href=url;a.download=name;
+  if(ios)a.target='_blank';document.body.append(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),60000);
+  return ios?'圖片已開啟，長按即可儲存':'穿搭卡已下載 ♡';
+}
+window.LuckyClubExport={draw:clubCardCanvas,save:clubSaveImage,openPreview:clubOpenPreview};
 async function saveOutfitCard(){
   if(!state.ready)return;
-  const canvas=outfitCardCanvas();
-  const blob=await canvasToBlob(canvas);
-  const filename='Dress_Code_好運拉霸_'+String(state.spins).padStart(3,'0')+'.png';
-  const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
-  if(navigator.share&&window.File){
-    const file=new File([blob],filename,{type:'image/png'});
-    try{
-      if(!navigator.canShare||navigator.canShare({files:[file]})){
-        await navigator.share({files:[file],title:document.title});
-        showToast('已開啟分享，請儲存圖片');
-        return;
-      }
-    }catch(err){if(err&&err.name==='AbortError')return;}
-  }
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url;a.download=filename;a.rel='noopener';if(isIOS)a.target='_blank';
-  document.body.appendChild(a);a.click();a.remove();
-  if(isIOS){showToast('已開啟圖片，長按即可儲存')}else{showToast('穿搭卡已下載 ✳')}
-  setTimeout(()=>URL.revokeObjectURL(url),60000);
+  const previewWin=clubOpenPreview();
+  $('#save').disabled=true;
+  try{const options=state.values;showToast(await clubSaveImage({theme:options[0],color:options[1],accessory:options[2],iconKeys:options.map(o=>o[0]),serial:'NO. '+String(state.spins).padStart(3,'0')},previewWin));}
+  catch(e){if(previewWin&&!previewWin.closed)previewWin.close();showToast('穿搭卡產生失敗，請再試一次');console.error(e)}
+  finally{$('#save').disabled=false;}
 }
 $('#save').addEventListener('click',saveOutfitCard);
 const leverControl=$('.control');
 $('#spin').addEventListener('click',()=>{leverControl.classList.remove('lever-pulled');void leverControl.offsetWidth;leverControl.classList.add('lever-pulled');setTimeout(()=>leverControl.classList.remove('lever-pulled'),440)});
 renderSoundButton();
-for(let i=0;i<3;i++)setBlank(i);
+for(let i=0;i<3;i++){state.values[i]=sample(lists[state.mode][i]);setIdle(i);}
 setupLedText();
 })();
 

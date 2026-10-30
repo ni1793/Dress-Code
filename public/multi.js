@@ -23,6 +23,7 @@
   const user=()=> room?.players.find(x=>x.id===room.viewerId)||null;
   const isHost=()=>room && room.hostId===room.viewerId;
   const locked=s=>room?.locked[s]!=null;
+  const current=()=>Math.min(2,room?.stage??0);
   const ready=()=>room && (room.phase==='playing'||room.phase==='finished');
   const toast=message=>{const el=$('#toast');el.textContent=message;el.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.remove('show'),2300);};
   function copy(text){
@@ -75,7 +76,7 @@
     try{
       const input=entryMode==='create'?{name,password,mode:createMode}:{name,password,code};
       const response=await api(entryMode,input);
-      try{localStorage.setItem('lucky_fit_name',name)}catch(e){}
+      try{localStorage.setItem('lucky_club_name',name)}catch(e){}
       $('#multi-password').value='';
       acceptRoom(response.room);
       watchEvents();
@@ -88,7 +89,7 @@
     if(!next)return;
     room=next;
     serverOffset=(next.serverNow||Date.now())-Date.now();
-    if(locked(selectedCategory)){const un=next.locked.findIndex(x=>x==null);if(un!==-1)selectedCategory=un;}
+    selectedCategory=Math.min(2,next.stage??0);
     entry.hidden=true;roomContainer.hidden=false;
     render();
   }
@@ -136,65 +137,65 @@
   function itemIcon(option){const holder=createEl('span','icon');if(option && window.LuckyFitIcon){holder.innerHTML=window.LuckyFitIcon(option[0]);}return holder;}
   function renderGame(){
     if(!room||!catalog)return;
+    const stage=room.stage,cat=Math.min(2,stage),me=user();selectedCategory=cat;
     const progress=$('#multi-progress');progress.replaceChildren();
     room.locked.forEach((entry,slot)=>{
-      const b=createEl('button','multi-pick'+(entry?' locked':selectedCategory===slot?' selected':''));
-      const label=createEl('span','category',CATEGORIES[slot]);
-      const desc=createEl('span','value',entry?entry.option[1]:'點此選擇');
-      b.append(label,desc);
-      if(entry)b.append(createEl('span','lock','✓ 全員一致 · 已鎖定'));
-      else b.addEventListener('click',()=>{selectedCategory=slot;renderGame()});
+      const active=slot===stage && room.phase!=='finished';
+      const b=createEl('div','multi-pick'+(entry?' locked':active?' current':' upcoming'));
+      b.append(createEl('span','category',CATEGORIES[slot]));
+      b.append(createEl('span','value',entry?entry.option[1]:active?'第 '+room.round+' 輪':'等待前一項'));
+      if(entry)b.append(createEl('span','lock','✓ 投票確定'));
+      else if(active)b.append(createEl('span','lock',room.roundStatus==='reveal'?'揭曉結果':'等待全員抽完'));
       progress.append(b);
     });
-    const me=user();let cat=selectedCategory;
-    if(locked(cat)){const un=room.locked.findIndex(x=>!x);if(un!==-1){cat=selectedCategory=un;}}
-    $('#multi-reel-label').textContent='你這次要抽 · '+CATEGORIES[cat];
-    const option=room.locked[cat]?.option || me?.values[cat]?.option || null;
-    const face=$('#multi-reel-face');
-    face.style.borderColor=me?.color||'#ffffff';
-    if(!me?.pending || me.pending.slot!==cat){
-      face.classList.remove('rolling');
-      if(animation){clearInterval(animation);animation=null;animateFor=null;}
+    const spinsDone=room.players.filter(p=>p.done).length;
+    const pending=room.players.filter(p=>p.pending).length;
+    const busy=room.roundStatus==='reveal';
+    const done=!!me?.done||!!me?.pending;
+    const isFinish=room.phase==='finished';
+    $('#multi-reel-label').textContent=isFinish?'本次穿搭已完成':`目前抽選 · ${CATEGORIES[cat]} ／第 ${room.round} 輪`;
+    const face=$('#multi-reel-face');face.style.borderColor=me?.color||'#ffffff';
+    const option=isFinish?room.locked[2]?.option:me?.values[cat]?.option||null;
+    if(me?.pending&&me.pending.slot===cat &&room.phase==='playing'){
+      if(animateFor!==cat){animateFor=cat;if(animation)clearInterval(animation);
+        face.classList.add('rolling');animation=setInterval(()=>{
+          const pool=catalog[room.mode][cat];showOption(pool[Math.floor(Math.random()*pool.length)]);
+        },65);
+      }
+    }else{
+      face.classList.remove('rolling');if(animation)clearInterval(animation);animation=null;animateFor=null;
       showOption(option);
-    }else if(animateFor!==cat){
-      animateFor=cat;
-      if(animation)clearInterval(animation);
-      face.classList.add('rolling');
-      let n=0;
-      animation=setInterval(()=>{
-        const pool=catalog[room.mode][cat];
-        const choice=pool[Math.floor(Math.random()*pool.length)];
-        showOption(choice);n++;
-      },110);
     }
-    const spin=$('#multi-spin');
-    spin.disabled=room.phase!=='playing'||!!me?.pending||locked(cat);
-    spin.textContent=room.phase==='finished'?'完成！':me?.pending?'抽選中…':room.phase==='countdown'?'準備開始':'SPIN';
-    $('#multi-key').textContent=room.phase==='countdown'?'房主已開始倒數，GO! 之後一起按 SPIN':room.phase==='finished'?'三個欄位都已全員一致！':`一次只抽「${CATEGORIES[cat]}」；想抽別欄請點上方分類`;
+    const spin=$('#multi-spin');spin.disabled=room.phase!=='playing'||busy||done||stage>=3;
+    spin.textContent=isFinish?'完成！':room.phase==='countdown'?'準備開始':busy?'正在揭曉…':me?.pending?'抽選中…':done?'等其他人…':'SPIN';
+    const key=$('#multi-key');
+    if(room.phase==='countdown')key.textContent='倒數結束後大家一起按 SPIN';
+    else if(isFinish)key.textContent='三項已由全員投票決定。';
+    else if(busy){
+      const summary=room.roundSummary;
+      key.textContent=summary?.tied?`第 ${room.round} 輪最高票平手！全員重抽 ${CATEGORIES[cat]}。`:`最多票：${summary?.winner?.option?.[1]||''}，接下來進入下一項。`;
+    }else key.textContent=`${CATEGORIES[cat]}：${spinsDone}／${room.players.length} 人已完成${pending?'（有人正在轉盤）':''}。${done?'請等待大家抽完。':'這一輪你只能抽一次。'}`;
     const table=$('#multi-team');table.replaceChildren();
     const head=createEl('div','multi-team-head');['成員','主題','配色','小物'].forEach(x=>head.append(createEl('span','',x)));table.append(head);
     room.players.forEach(p=>{
-      const row=createEl('div','multi-team-row');
-      const who=createEl('div','who');const dot=createEl('span','dot');dot.style.background=p.color;
+      const row=createEl('div','multi-team-row');const who=createEl('div','who');const dot=createEl('span','dot');dot.style.background=p.color;
       who.append(dot,createEl('span','',p.name+(p.id===room.viewerId?' (你)':'')));row.append(who);
       p.values.forEach((val,s)=>{
-        const pending=p.pending?.slot===s;
-        const text=pending?'抽選中…':val?val.option[1]:room.locked[s]?room.locked[s].option[1]:'—';
-        row.append(createEl('span','outcome'+(pending?' pending':'')+(locked(s)?' matched':''),text));
-      });
-      table.append(row);
+        const spinning=p.pending?.slot===s, hidden=room.roundStatus==='collecting' && s===stage && p.id!==room.viewerId;
+        const text=room.locked[s]?room.locked[s].option[1]:spinning?'轉盤中…':hidden?(p.done?'已抽完 ✓':'等待抽選'):val?val.option[1]:'—';
+        row.append(createEl('span','outcome'+(spinning?' pending':'')+(locked(s)?' matched':''),text));
+      });table.append(row);
     });
-    const win=$('#multi-winning');
-    win.hidden=room.phase!=='finished';
-    if(room.phase==='finished'){
-      win.replaceChildren(createEl('h3','','✦ 全員配對成功！'));
-      room.locked.forEach((v,s)=>win.append(createEl('p','',CATEGORIES[s]+'：'+v.option[1])));
-      const b=createEl('button','multi-small-btn','複製最後穿搭 ♡');b.style.marginTop='12px';
-      b.addEventListener('click',()=>{
-        const content='✦ LUCKY FIT CLUB · 全員穿搭配對成功\n'+room.locked.map((v,s)=>CATEGORIES[s]+'：'+v.option[1]).join('\n')+'\n\n我們一起穿這個！♡';
-        copy(content).then(()=>toast('穿搭結果已複製！')).catch(()=>toast('複製失敗，請稍後重試'));
-      });win.append(b);
-      const token=room.code+room.startAt;if(lastBurst!==token){lastBurst=token;win.animate([{transform:'scale(.6)',opacity:0},{transform:'scale(1.15)',opacity:1,offset:.52},{transform:'scale(1)',opacity:1}],{duration:780,easing:'ease-out'});}
+    // Same on-page result ticket, actions, text and image exporter as the solo game.
+    const ticket=$('#multi-ticket');ticket.hidden=!isFinish;
+    $('#multi-copy').disabled=!isFinish;$('#multi-save').disabled=!isFinish;
+    if(isFinish){
+      const vals=room.locked.map(x=>x.option);
+      $('#multi-serial').textContent='ROOM '+room.code;
+      $('#multi-result').textContent=vals[0][1]+' × '+vals[1][1];
+      $('#multi-detail').textContent='指定小物：'+vals[2][1]+'。全員一人一票，今天一起穿這個！♡';
+      const token=room.code+'|'+room.startAt;
+      if(lastBurst!==token){lastBurst=token;ticket.animate([{transform:'scale(.92)',opacity:.4},{transform:'scale(1.02)',opacity:1,offset:.56},{transform:'scale(1)',opacity:1}],{duration:950,easing:'ease-out'});}
     }
   }
   function showOption(option){
@@ -204,9 +205,22 @@
     $('#multi-item-en').textContent=option?option[2]:'READY TO SPIN';
   }
   $('#multi-spin').addEventListener('click',async()=>{
-    if(!room||room.phase!=='playing'||locked(selectedCategory))return;
+    if(!room||room.phase!=='playing'||room.roundStatus!=='collecting'||user()?.done||user()?.pending)return;
     $('#multi-spin').disabled=true;
     try{await api('spin',{slot:selectedCategory});}catch(e){showError(e.message);$('#multi-spin').disabled=false;}
+  });
+  function multiplayerResult(){return room?.phase==='finished'&&room.locked.every(Boolean)?room.locked.map(v=>v.option):null;}
+  $('#multi-copy').addEventListener('click',async()=>{
+    const v=multiplayerResult();if(!v)return;
+    const t='🎲 好運 Dress Code 拉霸 🎲\n主題：'+v[0][1]+'\n配色：'+v[1][1]+'\n指定小物：'+v[2][1]+'\n\n我們一起穿這個！♡';
+    try{await copy(t);toast('已複製！貼給朋友就可以 ♡')}catch(e){toast('複製失敗，請再試一次')}
+  });
+  $('#multi-save').addEventListener('click',async()=>{
+    const v=multiplayerResult();if(!v || !window.LuckyClubExport)return;
+    const btn=$('#multi-save');const preview=window.LuckyClubExport.openPreview();btn.disabled=true;
+    try{const msg=await window.LuckyClubExport.save({theme:v[0],color:v[1],accessory:v[2],iconKeys:v.map(o=>o[0]),serial:'ROOM '+room.code},preview);toast(msg)}
+    catch(e){if(preview&&!preview.closed)preview.close();console.error(e);toast('穿搭卡產生失敗，請再試一次')}
+    finally{btn.disabled=false;}
   });
   $('#multi-share').addEventListener('click',()=>{
     if(!room)return;const url=new URL(location.href);url.searchParams.set('room',room.code);
@@ -245,7 +259,7 @@
       if(response.ok){const data=await response.json();acceptRoom(data.room);watchEvents();}
     }catch(e){/* server may be waking up */}
   }
-  try{$('#multi-name').value=localStorage.getItem('lucky_fit_name')||'';}catch(e){}
+  try{$('#multi-name').value=localStorage.getItem('lucky_club_name')||'';}catch(e){}
   const param=new URL(location.href).searchParams.get('room');
   if(param){setEntry('join');$('#multi-code').value=param.toUpperCase().slice(0,6);setScreen(true);}
   if(window.LuckyFitCatalog){catalog=window.LuckyFitCatalog;}else{fetch(catalogUrl,{cache:'force-cache'}).then(r=>r.json()).then(data=>{catalog=data;if(room)render();}).catch(()=>{$('#multi-error').textContent='題目載入失敗，請重新整理頁面';});}

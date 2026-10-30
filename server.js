@@ -13,7 +13,8 @@ const rooms = new Map();
 const sessions = new Map();
 const MAX_PEOPLE = 12;
 const MAX_BYTES = 4096;
-const SPIN_MS = 1250;
+const SPIN_MS = 650;
+const REVEAL_MS = 1400;
 const COUNTDOWN_MS = 3000;
 const badAttempts = new Map();
 const randomId = () => crypto.randomBytes(18).toString('base64url');
@@ -30,28 +31,62 @@ function validPassword(s) { return typeof s==='string'&&s.length>=4&&s.length<=4
 function passDigest(pass, salt) { return crypto.scryptSync(pass,salt,32); }
 function passwordMatches(room, pass) { if(!pass || typeof pass!=='string')return false; const val=passDigest(pass,room.salt); return crypto.timingSafeEqual(val,room.hash); }
 function roomView(room, viewerId) {
+  const hidden = room.phase==='playing' && room.roundStatus==='collecting';
   return {code:room.code,mode:room.mode,phase:room.phase,startAt:room.startAt,
-    hostId:room.hostId,viewerId,locked:room.locked.map((val,i)=>val==null?null:{idx:val,option:catalog[room.mode][i][val]}),
-    players:[...room.players.values()].map(p=>({id:p.id,name:p.name,color:p.color,online:p.online,values:p.values.map((v,i)=>v==null?null:{idx:v,option:catalog[room.mode][i][v]}),pending:p.pending})),
-    spinMs:SPIN_MS, maxPeople:MAX_PEOPLE,
+    hostId:room.hostId,viewerId,stage:room.stage,round:room.round,roundStatus:room.roundStatus,
+    roundSummary:room.roundStatus==='reveal'?room.roundSummary:null,
+    locked:room.locked.map((val,i)=>val==null?null:{idx:val,option:catalog[room.mode][i][val]}),
+    players:[...room.players.values()].map(p=>({id:p.id,name:p.name,color:p.color,online:p.online,
+      values:p.values.map((v,i)=>v==null||hidden&&i===room.stage&&p.id!==viewerId?null:{idx:v,option:catalog[room.mode][i][v]}),
+      done:room.stage<3 && p.values[room.stage]!==null,pending:p.pending})),
+    spinMs:SPIN_MS,maxPeople:MAX_PEOPLE,
     lastEvent:room.lastEvent||null,serverNow:Date.now()};
 }
-function emit(room, message, id=null){
-  const payload=JSON.stringify({type:message,room:roomView(room,id||'')});
-  for(const [p,member] of room.players){for(const res of member.streams){try{res.write(`event: update\ndata: ${JSON.stringify({type:message,room:roomView(room,p)})}\n\n`)}catch(e){member.streams.delete(res)}}}
+function emit(room, message) {
+  for(const [p,member] of room.players){
+    for(const res of member.streams){
+      try{res.write(`event: update\ndata: ${JSON.stringify({type:message,room:roomView(room,p)})}\n\n`)}
+      catch(e){member.streams.delete(res)}
+    }
+  }
 }
 function announce(room,type){room.lastActive=Date.now();emit(room,type);}
 function memberFromRequest(req){const s=session(req);if(!s)return null;const room=rooms.get(s.roomCode);if(!room)return null;const p=room.players.get(s.playerId);return p?{s,room,p}:null;}
-function prunePlayer(room,id){const p=room.players.get(id);if(!p)return;for(const stream of p.streams){try{stream.end()}catch(e){}} p.streams.clear();room.players.delete(id);sessions.delete(p.sessionToken);if(room.hostId===id){room.hostId=room.players.keys().next().value||null;}if(room.players.size===0){rooms.delete(room.code);return;}if(room.players.size<2 && (room.phase==='playing'||room.phase==='countdown')){room.phase='lobby';room.startAt=null;room.locked=[null,null,null];for(const member of room.players.values()){member.values=[null,null,null];member.pending=null;}room.lastEvent='人數不足，已返回等待室';}else{checkMatches(room);}announce(room,'player_left');}
-function checkMatches(room){if(room.phase!=='playing')return;for(let s=0;s<3;s++){if(room.locked[s]!==null)continue;const players=[...room.players.values()];if(players.length<2)continue;const nums=players.map(p=>p.values[s]);if(nums.every(v=>v!==null&&v===nums[0]))room.locked[s]=nums[0];}
-  if(room.locked.every(v=>v!==null)){room.phase='finished';room.lastEvent='全員成功配對！';}}
-function chooseSpin(room,slot){
-  const options=catalog[room.mode][slot];
-  const tally=new Map();for(const p of room.players.values()){const idx=p.values[slot];if(idx!==null)tally.set(idx,(tally.get(idx)||0)+1);}
-  // Publicly disclosed "同頻加成": 65% of spins select one currently shared target.
-  // This makes a many-person matching game achievable without forcing a predetermined winner.
-  if(tally.size && crypto.randomInt(100)<65){const max=Math.max(...tally.values());const top=[...tally].filter(([,votes])=>votes===max).map(([key])=>key);return top[crypto.randomInt(top.length)];}
-  return crypto.randomInt(options.length);
+function resetRound(room) {
+  room.stage=0;room.round=1;room.roundStatus='collecting';room.roundSummary=null;
+  room.locked=[null,null,null];room.version=(room.version||0)+1;
+  for(const member of room.players.values()){member.values=[null,null,null];member.pending=null;}
+}
+function resolveRound(room) {
+  if(room.phase!=='playing'||room.roundStatus!=='collecting'||room.stage>2)return;
+  const players=[...room.players.values()];
+  if(players.length<2||players.some(p=>p.values[room.stage]===null||p.pending))return;
+  const stage=room.stage, round=room.round, version=room.version;
+  const count=new Map();for(const p of players)count.set(p.values[stage],(count.get(p.values[stage])||0)+1);
+  const max=Math.max(...count.values());const top=[...count].filter(([,n])=>n===max).map(([idx])=>idx);
+  const tied=top.length>1;const winner=tied?null:top[0];
+  room.roundStatus='reveal';
+  room.roundSummary={stage,round,tied,winner:winner===null?null:{idx:winner,option:catalog[room.mode][stage][winner]},votes:[...count].map(([idx,votes])=>({idx,votes,option:catalog[room.mode][stage][idx]})).sort((a,b)=>b.votes-a.votes)};
+  room.lastEvent=tied?`${LABELS[stage]} 第 ${round} 輪平手，全員準備重抽`:`${LABELS[stage]} 由「${catalog[room.mode][stage][winner][1]}」以 ${max} 票勝出`;
+  announce(room,tied?'round_tie':'round_winner');
+  setTimeout(()=>{
+    if(rooms.get(room.code)!==room||room.phase!=='playing'||room.version!==version||room.roundStatus!=='reveal'||room.stage!==stage)return;
+    if(tied){room.round++;for(const member of room.players.values())member.values[stage]=null;}
+    else {room.locked[stage]=winner;room.stage=stage+1;room.round=1;}
+    room.roundSummary=null;room.roundStatus='collecting';
+    if(room.stage>=3){room.phase='finished';room.lastEvent='三項投票全部完成！';announce(room,'finished');}
+    else {room.lastEvent=tied?`第 ${room.round} 輪，請全員再抽一次 ${LABELS[stage]}`:`現在開始 ${LABELS[room.stage]}，每人抽一次`;announce(room,tied?'reroll':'next_stage');}
+  },REVEAL_MS).unref?.();
+}
+function prunePlayer(room,id){
+  const p=room.players.get(id);if(!p)return;
+  for(const stream of p.streams){try{stream.end()}catch(e){}}p.streams.clear();room.players.delete(id);sessions.delete(p.sessionToken);
+  if(room.hostId===id)room.hostId=room.players.keys().next().value||null;
+  if(room.players.size===0){rooms.delete(room.code);return;}
+  if(room.players.size<2 && (room.phase==='playing'||room.phase==='countdown')){
+    room.phase='lobby';room.startAt=null;resetRound(room);room.lastEvent='人數不足，已返回等待室';
+  }else resolveRound(room);
+  announce(room,'player_left');
 }
 async function readJson(req){let data='';for await(const chunk of req){data+=chunk;if(Buffer.byteLength(data)>MAX_BYTES)throw Error('資料太長');}try{return JSON.parse(data||'{}')}catch(e){throw Error('資料格式不正確')}}
 function requireMember(req,res){const info=memberFromRequest(req);if(!info)fail(res,401,'請先加入房間');return info;}
@@ -85,7 +120,7 @@ async function handler(req,res){
         if(![0,1].includes(body.mode)){fail(res,400,'無效的玩法');return;}
         let code=makeCode();while(rooms.has(code))code=makeCode();
         const salt=crypto.randomBytes(18);
-        room={code,mode:body.mode,phase:'lobby',startAt:null,hostId:null,locked:[null,null,null],players:new Map(),salt,hash:passDigest(pass,salt),lastActive:Date.now(),lastEvent:'房間已建立'};
+        room={code,mode:body.mode,phase:'lobby',startAt:null,hostId:null,locked:[null,null,null],stage:0,round:1,roundStatus:'collecting',roundSummary:null,version:0,players:new Map(),salt,hash:passDigest(pass,salt),lastActive:Date.now(),lastEvent:'房間已建立'};
         rooms.set(code,room);
       }else{
         const code=String(body.code||'').trim().toUpperCase();room=rooms.get(code);
@@ -108,27 +143,28 @@ async function handler(req,res){
       if(room.hostId!==p.id){fail(res,403,'只有房主可以開始');return;}
       if(room.phase!=='lobby' && room.phase!=='finished'){fail(res,409,'目前無法開始新局');return;}
       if(room.players.size<2){fail(res,409,'至少需要 2 人才能開始');return;}
-      room.phase='countdown';room.startAt=Date.now()+COUNTDOWN_MS;room.locked=[null,null,null];room.lastEvent='房主開始了倒數！';
-      for(const member of room.players.values()){member.values=[null,null,null];member.pending=null;}
+      room.phase='countdown';room.startAt=Date.now()+COUNTDOWN_MS;resetRound(room);room.lastEvent='房主開始了倒數！';
       announce(room,'countdown');
       setTimeout(()=>{if(rooms.get(room.code)!==room||room.phase!=='countdown')return;room.phase='playing';room.lastEvent='GO! 大家開始抽選';announce(room,'go');},COUNTDOWN_MS).unref?.();
       json(res,200,{ok:true,room:roomView(room,p.id)});return;
     }
     if(pathname==='/api/spin'){
       const slot=Number(body.slot);
-      if(room.phase!=='playing'){fail(res,409,'請等倒數結束，再按 SPIN');return;}
-      if(!Number.isInteger(slot)||slot<0||slot>2){fail(res,400,'請選擇一個欄位');return;}
-      if(room.locked[slot]!==null){fail(res,409,'這一欄已鎖定，換一欄吧');return;}
-      if(p.pending){fail(res,409,'上一次抽選還沒完成');return;}
-      if(Date.now()-p.lastSpin<500){fail(res,429,'請不要連續點太快');return;}
-      p.lastSpin=Date.now();p.pending={slot,endsAt:Date.now()+SPIN_MS};room.lastEvent=p.name+' 正在抽 '+LABELS[slot];announce(room,'spinning');
+      if(room.phase!=='playing'||room.roundStatus!=='collecting'){fail(res,409,'請等本輪公布後，再繼續抽選');return;}
+      if(!Number.isInteger(slot)||slot!==room.stage){fail(res,409,`目前只能抽 ${LABELS[room.stage]}`);return;}
+      if(p.pending||p.values[slot]!==null){fail(res,409,'這輪你已經抽過了，請等所有人完成');return;}
+      if(Date.now()-p.lastSpin<400){fail(res,429,'請不要連續點太快');return;}
+      p.lastSpin=Date.now();p.pending={slot,endsAt:Date.now()+SPIN_MS};
+      // Independent, uniform random choice. No weighted or host-influenced option.
+      const choice=crypto.randomInt(catalog[room.mode][slot].length);
+      const version=room.version,round=room.round;
+      room.lastEvent=p.name+' 正在抽 '+LABELS[slot];announce(room,'spinning');
       setTimeout(()=>{
-        if(rooms.get(room.code)!==room || !room.players.has(p.id)||!p.pending || p.pending.slot!==slot)return;
+        if(rooms.get(room.code)!==room||!room.players.has(p.id)||room.version!==version||room.round!==round||room.stage!==slot||!p.pending)return;
         p.pending=null;
-        if(room.phase!=='playing'||room.locked[slot]!==null)return;
-        const val=chooseSpin(room,slot);p.values[slot]=val;
-        room.lastEvent=p.name+' 抽到 '+catalog[room.mode][slot][val][1];checkMatches(room);
-        announce(room,room.phase==='finished'?'finished':room.locked[slot]!==null?'locked':'spun');
+        if(room.phase!=='playing'||room.roundStatus!=='collecting')return;
+        p.values[slot]=choice;room.lastEvent=p.name+' 已完成這輪抽選';
+        announce(room,'spun');resolveRound(room);
       },SPIN_MS).unref?.();
       json(res,200,{ok:true});return;
     }
@@ -138,8 +174,7 @@ async function handler(req,res){
     if(pathname==='/api/lobby'){
       if(room.hostId!==p.id){fail(res,403,'只有房主可以重新開局');return;}
       if(room.phase!=='finished'){fail(res,409,'這一局還未完成');return;}
-      room.phase='lobby';room.locked=[null,null,null];room.startAt=null;room.lastEvent='準備下一局';
-      room.players.forEach(x=>{x.values=[null,null,null];x.pending=null;});announce(room,'lobby');json(res,200,{ok:true});return;
+      room.phase='lobby';resetRound(room);room.startAt=null;room.lastEvent='準備下一局';announce(room,'lobby');json(res,200,{ok:true});return;
     }
     fail(res,404,'找不到功能');return;
   }
@@ -152,4 +187,4 @@ async function handler(req,res){
 }
 const server=http.createServer((req,res)=>{Promise.resolve(handler(req,res)).catch(e=>{console.error('server error:',e.message);if(!res.headersSent)fail(res,500,'伺服器發生問題');else res.end();});});
 setInterval(()=>{const now=Date.now();for(const [code,room] of rooms){if(now-room.lastActive>2*60*60*1000){for(const p of room.players.values()){p.streams.forEach(r=>r.end());sessions.delete(p.sessionToken)}rooms.delete(code);}}for(const [k,v] of badAttempts){if(now-v.until>5*60*1000)badAttempts.delete(k)}},60*1000).unref();
-server.listen(PORT,'0.0.0.0',()=>console.log(`Lucky Fit multiplayer on http://0.0.0.0:${PORT}`));
+server.listen(PORT,'0.0.0.0',()=>console.log(`Lucky Club multiplayer on http://0.0.0.0:${PORT}`));
