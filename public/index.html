@@ -879,10 +879,10 @@ function cell(item){const el=document.createElement('div');el.className='cell';c
 function setIdle(i){const reel=reelEls[i];reel.style.transition='none';reel.style.transform='translateY(0)';reel.replaceChildren(cell(sample(lists[state.mode][i])),cell(state.values[i]),cell(sample(lists[state.mode][i])));reel.parentElement.removeAttribute('aria-busy')}
 // The empty state displays no previous outfit choices anywhere on the reels.
 function setBlank(i){const reel=reelEls[i];reel.style.transition='none';reel.style.transform='translateY(0)';reel.replaceChildren(cell(['blank','','']),cell(blankValue),cell(['blank','','']));reel.parentElement.removeAttribute('aria-busy')}
-let audio=null;function beep(freq=420,dur=.07,type='sine',vol=.035){if(!state.sound)return;try{audio=audio||new (window.AudioContext||window.webkitAudioContext)();if(audio.state==='suspended')audio.resume();const osc=audio.createOscillator(),gain=audio.createGain();osc.type=type;osc.frequency.setValueAtTime(freq,audio.currentTime);gain.gain.setValueAtTime(vol,audio.currentTime);gain.gain.exponentialRampToValueAtTime(.0001,audio.currentTime+dur);osc.connect(gain).connect(audio.destination);osc.start();osc.stop(audio.currentTime+dur)}catch(e){}}
+let audio=null;function beep(freq=420,dur=.07,type='sine',vol=.022){if(!state.sound)return;try{audio=audio||new (window.AudioContext||window.webkitAudioContext)();if(audio.state==='suspended')audio.resume();const osc=audio.createOscillator(),gain=audio.createGain();osc.type=type;osc.frequency.setValueAtTime(freq,audio.currentTime);gain.gain.setValueAtTime(vol,audio.currentTime);gain.gain.exponentialRampToValueAtTime(.0001,audio.currentTime+dur);osc.connect(gain).connect(audio.destination);osc.start();osc.stop(audio.currentTime+dur)}catch(e){}}
 // Offline-ready recorded/synthesized slot sound files, explicitly started by a user tap.
 const rollAudio=$('#slot-roll-audio'),stopAudio=$('#slot-stop-audio'),winAudio=$('#slot-win-audio');
-rollAudio.volume=.90;stopAudio.volume=.87;winAudio.volume=.88;
+rollAudio.volume=.28;stopAudio.volume=.43;winAudio.volume=.62;
 function playSfx(el){if(!state.sound)return;try{el.pause();el.currentTime=0;const p=el.play();if(p&&p.catch)p.catch(()=>{ /* device silent mode or browser policy */ });}catch(e){}}
 function stopRollSound(){try{rollAudio.pause();rollAudio.currentTime=0}catch(e){}}
 function startRollSound(){if(!state.sound)return;try{stopRollSound();const p=rollAudio.play();if(p&&p.catch)p.catch(()=>{});}catch(e){}}
@@ -1127,14 +1127,14 @@ setupLedText();
 
 </script>
 <div id="slam-overlay" class="slam-overlay" aria-hidden="true"><div id="slam-number" class="slam-number">3</div></div>
-<script src="/multi.js?v=personal-picks-20261030"></script>
+<script src="/multi.js?v=personal-picks-audiofix-20261030"></script>
 <audio id="club-background-music" preload="none" loop src="/dewdrops-on-glass.mp3" aria-hidden="true"></audio>
 <script id="lucky-club-bgm-script">
 (() => {
   const music = document.getElementById('club-background-music');
   const button = document.getElementById('bgm-toggle');
   if (!music || !button) return;
-  music.volume = 0.20;
+  music.volume = 0.45;
   // Browser autoplay policies require the listener to press this button first.
   function render() {
     const playing = !music.paused && !music.ended;
