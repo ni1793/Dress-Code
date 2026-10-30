@@ -15,6 +15,41 @@
   let lastBurst='';
   let temporaryMessage='';
   let countdownToken='';
+
+  // Multiplayer reuses the solo machine's sound assets. Playback starts in
+  // the actual SPIN click handler, required for mobile browser audio policies.
+  const multiRollAudio=document.getElementById('slot-roll-audio');
+  const multiStopAudio=document.getElementById('slot-stop-audio');
+  const speakerToggle=document.getElementById('sound');
+  let multiSpinAudioTimer=null;
+  const multiSoundEnabled=()=>speakerToggle?.getAttribute('aria-pressed')==='true';
+  function stopMultiSpinAudio(finished=false){
+    if(multiSpinAudioTimer!==null){clearTimeout(multiSpinAudioTimer);multiSpinAudioTimer=null;}
+    if(multiRollAudio){
+      try{multiRollAudio.pause();multiRollAudio.currentTime=0;}catch(e){}
+    }
+    if(finished&&multiSoundEnabled()&&multiStopAudio){
+      try{
+        multiStopAudio.pause();multiStopAudio.currentTime=0;
+        const play=multiStopAudio.play();if(play?.catch)play.catch(()=>{});
+      }catch(e){}
+    }
+  }
+  function startMultiSpinAudio(duration){
+    stopMultiSpinAudio();
+    if(!multiSoundEnabled()||!multiRollAudio)return;
+    try{
+      multiRollAudio.currentTime=0;
+      const play=multiRollAudio.play();if(play?.catch)play.catch(()=>{});
+    }catch(e){}
+    multiSpinAudioTimer=setTimeout(()=>stopMultiSpinAudio(true),Math.max(250,Number(duration)||650));
+  }
+  speakerToggle?.addEventListener('click',()=>{
+    if(!multiSoundEnabled())stopMultiSpinAudio();
+  });
+  document.addEventListener('visibilitychange',()=>{
+    if(document.hidden)stopMultiSpinAudio();
+  });
   const stage=$('.stage');
   const selectCreate=$('#choose-create'), selectJoin=$('#choose-join');
   const entry=$('#multi-entry'), roomContainer=$('#multi-room');
@@ -43,6 +78,7 @@
       toast('單機轉盤正在轉動，停下後再切換模式 ♡');return;
     }
     const wasMulti=stage.classList.contains('is-multi');
+    if(!toMulti)stopMultiSpinAudio();
     stage.classList.toggle('is-multi',toMulti);
     $('#solo-mode').classList.toggle('active',!toMulti);
     $('#multi-mode').classList.toggle('active',toMulti);
@@ -245,7 +281,9 @@
   $('#multi-spin').addEventListener('click',async()=>{
     if(!room||room.phase!=='playing'||room.roundStatus!=='collecting'||user()?.done||user()?.pending)return;
     $('#multi-spin').disabled=true;
-    try{await api('spin',{slot:selectedCategory});}catch(e){showError(e.message);$('#multi-spin').disabled=false;}
+    startMultiSpinAudio(room.spinMs);
+    try{await api('spin',{slot:selectedCategory});}
+    catch(e){stopMultiSpinAudio();showError(e.message);$('#multi-spin').disabled=false;}
   });
   function multiplayerResult(){return room?.phase==='finished'&&room.locked.every(Boolean)?room.locked.map(v=>v.option):null;}
   $('#multi-copy').addEventListener('click',async()=>{
@@ -267,6 +305,7 @@
   $('#multi-leave').addEventListener('click',async()=>{
     try{await api('leave')}catch(e){}
     if(stream){stream.close();stream=null;}
+    stopMultiSpinAudio();
     room=null;countdownToken='';
     if(animation)clearInterval(animation);animation=null;animateFor=null;
     entry.hidden=false;roomContainer.hidden=true;
