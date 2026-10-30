@@ -481,9 +481,94 @@ body::after,.stage::after{display:none !important;content:none !important}
 .ticket.is-loading .detail{padding-bottom:0 !important}
 </style>
 
+<style id="multiplayer-style">
+/* Multiplayer: same pink / mint / lime / silver arcade language, with one shared reel. */
+.stage{padding-top:76px}
+.mode-switch{position:absolute;left:50%;transform:translateX(-50%);top:17px;z-index:9;display:flex;gap:4px;padding:5px;background:#fff;border:2px solid #9ca2ae;box-shadow:0 5px 0 #636a76;border-radius:22px;white-space:nowrap}
+.mode-switch button{appearance:none;border:0;padding:9px 21px;border-radius:15px;background:transparent;font-size:13px;font-weight:900;color:#454653;cursor:pointer}
+.mode-switch button.active{background:#15141e;color:#fff;box-shadow:inset 0 -3px 0 #353240}
+.multiplayer-view{display:none;padding:8px 14px 26px;color:#181822}
+.stage.is-multi .multiplayer-view{display:block}
+.stage.is-multi .hero,.stage.is-multi .game,.stage.is-multi .control,.stage.is-multi .status,.stage.is-multi .caption,.stage.is-multi .ticket,.stage.is-multi .footer{display:none !important}
+.stage.is-multi .screen{min-height:620px}
+.stage.is-multi .phone{margin-top:0}
+.multi-title{text-align:center;margin:3px 0 16px;line-height:1.05;color:#181822}
+.multi-title .micro{display:inline-block;background:#15151d;color:#fff;padding:6px 13px;border-radius:50px;font-size:10px;letter-spacing:.17em;margin-bottom:8px}
+.multi-title h2{margin:0;font-size:38px;font-weight:1000;letter-spacing:-.06em;text-shadow:3px 4px 0 #fff7}
+.multi-title .sub{font-size:12px;font-weight:800;color:#555261;margin:7px 0 0}
+.multi-panel{padding:18px 15px;margin:9px 0 16px;border:3px solid #fff;border-radius:26px;background:linear-gradient(165deg,#fcfdff,#e7ebf3);box-shadow:0 0 0 2px #969ca8,0 8px 0 #828896,inset 0 4px 0 #fff}
+.multi-panel h3{font-size:19px;font-weight:1000;letter-spacing:-.03em;margin:0 0 12px}
+.multi-tabs{display:flex;gap:8px;margin-bottom:15px}
+.multi-tabs button{flex:1;border:2px solid #b6b9c1;background:#fff;padding:11px 6px;border-radius:15px;font-weight:900;color:#303039;box-shadow:0 3px 0 #c1c5cd;cursor:pointer}
+.multi-tabs button.on{background:#ff72c0;border-color:#eb51a5;color:#1b1420;box-shadow:0 4px 0 #cc438d}
+.multi-label{display:block;font-weight:900;font-size:12px;letter-spacing:.025em;margin:13px 0 6px;color:#3b3b48}
+.multi-input{width:100%;font:800 16px inherit;font-size:16px;border:2px solid #a9aeba;border-radius:13px;padding:12px 13px;background:#fff;color:#14141c;box-shadow:inset 0 2px 2px #a0a7b015;outline:none}
+.multi-input:focus{border-color:#ff58b3;box-shadow:0 0 0 3px #ff6dbc3a}
+.multi-duo{display:flex;gap:7px}.multi-duo button{flex:1;border-radius:12px;border:2px solid #afb5be;background:#fff;font-weight:900;padding:10px 7px}.multi-duo button.selected{background:#d7fc5d;border-color:#a5cb24}
+.multi-submit{display:block;width:100%;margin-top:20px;font-size:17px;font-weight:1000;letter-spacing:.02em;border:5px solid #fff;color:#171b20;background:linear-gradient(#e8ff78,#bcec24);padding:13px;border-radius:999px;box-shadow:0 0 0 2px #8c9e2a,0 7px 0 #81ad1a;cursor:pointer}
+.multi-submit:disabled{opacity:.55;cursor:not-allowed}
+.multi-help{font-size:11px;font-weight:700;line-height:1.65;color:#6e6878;margin:12px 0 0}
+.multi-error{min-height:17px;color:#a21a51;font-size:12px;font-weight:900;margin-top:12px}
+.multi-room-head{display:flex;align-items:center;justify-content:space-between;gap:9px;margin-bottom:11px}
+.multi-code{font-size:27px;font-weight:1000;letter-spacing:.12em;line-height:1.1;color:#161520}
+.multi-room-meta{font-size:10px;letter-spacing:.04em;color:#555364;font-weight:900;margin-top:5px}
+.multi-room-actions{display:flex;gap:5px}
+.multi-small-btn{appearance:none;border:2px solid #171722;border-radius:12px;padding:8px 10px;background:#fff;color:#20202a;font-size:11px;font-weight:1000;cursor:pointer;white-space:nowrap}
+.multi-small-btn.danger{color:#b62b59}
+.multi-phase{background:#11111b;color:#fff;padding:9px 12px;border-radius:13px;font-weight:900;font-size:12px;margin:12px 0;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.multi-phase em{font-style:normal;color:#d4ff5a;font-size:10px}
+.multi-players{display:flex;gap:7px;flex-wrap:wrap;margin:11px 0}
+.multi-person{display:inline-flex;align-items:center;gap:6px;padding:5px 8px;border-radius:999px;background:#fff;border:1px solid #b6bec8;font-size:11px;font-weight:900;max-width:100%}
+.multi-person.offline{opacity:.47}
+.multi-person .dot{width:12px;height:12px;border-radius:50%;border:1px solid #31313b;flex:0 0 12px}
+.multi-start{margin:12px 0 8px}
+.multi-notice{font-size:11px;font-weight:700;color:#686979;line-height:1.6;margin:9px 0}
+.multi-progress{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:15px 0 13px}
+.multi-pick{appearance:none;border:3px solid #fff;border-radius:16px;padding:10px 5px;background:#fff;min-width:0;min-height:91px;box-shadow:0 0 0 2px #a5a9b3,0 5px 0 #9197a7;font-weight:900;color:#252632;cursor:pointer}
+.multi-pick.selected{background:#ff8cca;box-shadow:0 0 0 3px #f44aac,0 6px 0 #bf2782}
+.multi-pick.locked{background:#d8fb7b;box-shadow:0 0 0 2px #a9cf39,0 5px 0 #759c19;cursor:default}
+.multi-pick .category{display:block;font-size:12px;margin-bottom:8px}
+.multi-pick .value{display:block;font-size:11px;line-height:1.32;overflow-wrap:anywhere}
+.multi-pick .lock{font-size:10px;display:block;margin-top:5px;color:#4f6f10}
+.multi-single-reel{position:relative;min-height:240px;padding:10px;background:#10121c;border:4px solid #33333c;border-radius:26px;box-shadow:0 0 0 3px #ff62b8,0 0 0 7px #cdfe31,0 12px 0 #d14595,inset 0 0 0 2px #646473;text-align:center}
+.multi-current-label{font-size:11px;color:#d6dce7;font-weight:900;letter-spacing:.12em;margin:5px 0 11px}
+.multi-reel-face{background:linear-gradient(180deg,#fff,#eef2fa);border:4px solid #fff;border-radius:22px;min-height:148px;display:flex;align-items:center;justify-content:center;flex-direction:column;box-shadow:inset 0 3px 0 #fff,0 8px 0 #8e97a9;gap:5px;padding:9px}
+.multi-reel-face .icon{display:grid;place-items:center;width:90px;height:70px}
+.multi-reel-face svg{width:86px;height:69px;display:block}
+.multi-reel-face strong{font-size:22px;line-height:1.12;color:#1c1b24;letter-spacing:-.05em}
+.multi-reel-face small{font-size:10px;color:#737a8c;letter-spacing:.08em;font-weight:900}
+.multi-reel-face.rolling .icon{animation:multiBop .14s infinite alternate}
+@keyframes multiBop{0%{transform:translateY(-5px)}100%{transform:translateY(6px)}}
+.multi-spin{margin:24px auto 5px;display:block;width:158px;max-width:85%;height:71px;border:6px solid #fff;border-radius:999px;font-size:30px;font-weight:1000;color:#1c2020;background:linear-gradient(170deg,#e5ff75,#bbed21);box-shadow:0 0 0 3px #8c9aa2,0 8px 0 #80a919,inset 0 5px 0 #ffffff83;cursor:pointer}
+.multi-spin:active{transform:translateY(5px);box-shadow:0 0 0 3px #8c9aa2,0 3px 0 #80a919}
+.multi-spin:disabled{opacity:.6;cursor:not-allowed}
+.multi-key{text-align:center;margin:12px 0 0;color:#666878;font-weight:800;font-size:11px}
+.multi-team-table{border-radius:16px;background:#fff;border:2px solid #d5d8df;overflow:hidden;margin:13px 0}
+.multi-team-head,.multi-team-row{display:grid;grid-template-columns:minmax(85px,1.2fr) repeat(3,minmax(0,1fr));gap:4px;align-items:center;padding:9px 7px}
+.multi-team-head{background:#e5e7ed;font-size:11px;font-weight:900;color:#4f5062}
+.multi-team-row{border-top:1px solid #d9dce3;font-size:11px;font-weight:850;color:#23232f}
+.multi-team-row .who{display:flex;align-items:center;gap:5px;min-width:0}
+.multi-team-row .who span:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.multi-team-row .who .dot{flex-shrink:0;width:10px;height:10px;border-radius:50%}
+.multi-team-row .outcome{font-size:10px;overflow-wrap:anywhere;line-height:1.3;text-align:center}
+.multi-team-row .outcome.pending{color:#d12c81}
+.multi-team-row .outcome.matched{color:#58800c}
+.multi-winning{padding:14px;background:#dfff9e;border:3px solid #adcf44;border-radius:16px;text-align:center;margin:12px 0}
+.multi-winning h3{font-size:25px;margin:0 0 9px}
+.multi-winning p{font-size:13px;line-height:1.8;font-weight:900;margin:0}
+.slam-overlay{position:fixed;inset:0;display:none;z-index:200;align-items:center;justify-content:center;pointer-events:none;background:rgba(13,11,24,.72);backdrop-filter:blur(8px)}
+.slam-overlay.on{display:flex}
+.slam-number{font-family:'Arial Black','Noto Sans TC',system-ui,sans-serif;font-weight:1000;font-size:min(45vw,230px);color:#fff;text-shadow:0 10px 0 #ff55b6,0 22px 25px #05030dba;letter-spacing:-.07em;animation:numberSlam .75s cubic-bezier(.2,.7,.25,1) both}
+.slam-number.go{color:#cbfb3d;text-shadow:0 9px 0 #4c8d1d,0 22px 26px #000b}
+@keyframes numberSlam{0%{transform:translateY(-65px) scale(3);opacity:.2;filter:blur(7px)}30%{transform:translateY(16px) scale(.9);opacity:1;filter:blur(0)}55%{transform:translateY(-13px) scale(1.15)}78%{transform:translateY(4px) scale(.98)}100%{transform:translateY(0) scale(1);opacity:1}}
+@media(max-width:550px){.stage{padding-top:66px}.mode-switch{top:10px}.mode-switch button{padding:8px 18px}.multi-title h2{font-size:33px}.multiplayer-view{padding:8px 12px 26px}.multi-room-head{align-items:flex-start}.multi-small-btn{padding:7px 8px}.multi-code{font-size:22px}.multi-single-reel{min-height:224px}.multi-pick{min-height:86px}}
+@media(max-width:370px){.multi-title h2{font-size:29px}.multi-team-head,.multi-team-row{grid-template-columns:minmax(75px,1.1fr) repeat(3,minmax(0,1fr));padding:8px 4px}.multi-progress{gap:5px}.multi-pick{font-size:10px}}
+
+</style>
 </head>
 <body>
 <div class="stage">
+ <div class="mode-switch" role="tablist" aria-label="遊戲模式"><button type="button" id="solo-mode" class="active" aria-selected="true">單機模式</button><button type="button" id="multi-mode" aria-selected="false">多人連線</button></div>
  <div class="checker check-left" aria-hidden="true"></div><div class="checker check-right" aria-hidden="true"></div>
  <div class="side-sticker left" aria-hidden="true">GOOD<br>OUTFIT<br>BETTER<br>FRIENDS</div><div class="side-sticker right" aria-hidden="true">GOOD VIBES<br>ONLY ♡</div>
  <span class="bg-flower f1" aria-hidden="true"><svg viewBox="0 0 200 200" focusable="false" role="presentation" xmlns="http://www.w3.org/2000/svg"><g><g fill="#7fa959"><ellipse cx="100" cy="46" rx="27" ry="41" transform="rotate(0 100 100) translate(0 8)"/><ellipse cx="100" cy="46" rx="27" ry="41" transform="rotate(45 100 100) translate(0 8)"/><ellipse cx="100" cy="46" rx="27" ry="41" transform="rotate(90 100 100) translate(0 8)"/><ellipse cx="100" cy="46" rx="27" ry="41" transform="rotate(135 100 100) translate(0 8)"/><ellipse cx="100" cy="46" rx="27" ry="41" transform="rotate(180 100 100) translate(0 8)"/><ellipse cx="100" cy="46" rx="27" ry="41" transform="rotate(225 100 100) translate(0 8)"/><ellipse cx="100" cy="46" rx="27" ry="41" transform="rotate(270 100 100) translate(0 8)"/><ellipse cx="100" cy="46" rx="27" ry="41" transform="rotate(315 100 100) translate(0 8)"/></g><g fill="#fffdf9"><ellipse cx="100" cy="43" rx="27" ry="41" transform="rotate(0 100 100)"/><ellipse cx="100" cy="43" rx="27" ry="41" transform="rotate(45 100 100)"/><ellipse cx="100" cy="43" rx="27" ry="41" transform="rotate(90 100 100)"/><ellipse cx="100" cy="43" rx="27" ry="41" transform="rotate(135 100 100)"/><ellipse cx="100" cy="43" rx="27" ry="41" transform="rotate(180 100 100)"/><ellipse cx="100" cy="43" rx="27" ry="41" transform="rotate(225 100 100)"/><ellipse cx="100" cy="43" rx="27" ry="41" transform="rotate(270 100 100)"/><ellipse cx="100" cy="43" rx="27" ry="41" transform="rotate(315 100 100)"/></g><circle cx="100" cy="100" r="35" fill="#f1c40f"/><circle cx="88" cy="96" r="4.8" fill="#121212"/><circle cx="112" cy="96" r="4.8" fill="#121212"/><path d="M86 112 Q100 123 114 112" fill="none" stroke="#121212" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></g></svg></span>
@@ -491,6 +576,39 @@ body::after,.stage::after{display:none !important;content:none !important}
  <span class="bg-flower f3" aria-hidden="true"><svg viewBox="0 0 200 200" focusable="false" role="presentation" xmlns="http://www.w3.org/2000/svg"><g><g fill="#7fa959"><ellipse cx="100" cy="46" rx="27" ry="41" transform="rotate(0 100 100) translate(0 8)"/><ellipse cx="100" cy="46" rx="27" ry="41" transform="rotate(45 100 100) translate(0 8)"/><ellipse cx="100" cy="46" rx="27" ry="41" transform="rotate(90 100 100) translate(0 8)"/><ellipse cx="100" cy="46" rx="27" ry="41" transform="rotate(135 100 100) translate(0 8)"/><ellipse cx="100" cy="46" rx="27" ry="41" transform="rotate(180 100 100) translate(0 8)"/><ellipse cx="100" cy="46" rx="27" ry="41" transform="rotate(225 100 100) translate(0 8)"/><ellipse cx="100" cy="46" rx="27" ry="41" transform="rotate(270 100 100) translate(0 8)"/><ellipse cx="100" cy="46" rx="27" ry="41" transform="rotate(315 100 100) translate(0 8)"/></g><g fill="#fffdf9"><ellipse cx="100" cy="43" rx="27" ry="41" transform="rotate(0 100 100)"/><ellipse cx="100" cy="43" rx="27" ry="41" transform="rotate(45 100 100)"/><ellipse cx="100" cy="43" rx="27" ry="41" transform="rotate(90 100 100)"/><ellipse cx="100" cy="43" rx="27" ry="41" transform="rotate(135 100 100)"/><ellipse cx="100" cy="43" rx="27" ry="41" transform="rotate(180 100 100)"/><ellipse cx="100" cy="43" rx="27" ry="41" transform="rotate(225 100 100)"/><ellipse cx="100" cy="43" rx="27" ry="41" transform="rotate(270 100 100)"/><ellipse cx="100" cy="43" rx="27" ry="41" transform="rotate(315 100 100)"/></g><circle cx="100" cy="100" r="35" fill="#f1c40f"/><circle cx="88" cy="96" r="4.8" fill="#121212"/><circle cx="112" cy="96" r="4.8" fill="#121212"/><path d="M86 112 Q100 123 114 112" fill="none" stroke="#121212" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></g></svg></span>
  <main class="phone"><div class="screen">
   <div class="topbar"><div>LUCKY ✳ CLUB</div><div class="right"><button class="speaker" id="sound" aria-label="切換音效" aria-pressed="true" title="音效開啟／關閉（開啟時有試聽）"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 14h4l5 4V6l-5 4H4z" fill="#fffaf0" stroke="#161616" stroke-width="1.3" stroke-linejoin="round"/><path d="M16 8.5c1.8 1.5 1.8 5.5 0 7" fill="none" stroke="#fffaf0" stroke-width="1.8" stroke-linecap="round"/><path d="M18.7 6c3.3 2.8 3.3 10.2 0 13" fill="none" stroke="#fffaf0" stroke-width="1.6" stroke-linecap="round"/></svg></button></div></div>
+  
+<section class="multiplayer-view" id="multiplayer-view" aria-label="多人連線房間">
+  <div class="multi-title"><span class="micro">LUCKY FIT CLUB · ONLINE</span><h2>一起抽到一樣！</h2><p class="sub">每人一色・一次一欄・三欄全員一致就成功</p></div>
+  <div id="multi-entry" class="multi-panel">
+    <div class="multi-tabs"><button type="button" id="choose-create" class="on">建立房間</button><button type="button" id="choose-join">加入房間</button></div>
+    <form id="multi-form">
+      <label class="multi-label" for="multi-name">你的暱稱</label><input class="multi-input" id="multi-name" maxlength="18" autocomplete="nickname" placeholder="例如：粉紅小花" required>
+      <div id="room-code-block" hidden><label class="multi-label" for="multi-code">房間代碼（6 碼）</label><input class="multi-input" id="multi-code" maxlength="6" autocapitalize="characters" placeholder="XXXXXX" spellcheck="false"></div>
+      <label class="multi-label" for="multi-password">房間密碼</label><input class="multi-input" id="multi-password" type="password" minlength="4" maxlength="40" autocomplete="off" placeholder="至少 4 碼" required>
+      <div id="create-mode"><label class="multi-label">這一局的題目</label><div class="multi-duo"><button type="button" data-create-mode="0" class="selected">日常好穿</button><button type="button" data-create-mode="1">怪趣挑戰</button></div></div>
+      <button type="submit" id="multi-form-submit" class="multi-submit">建立密碼房間</button>
+      <div id="multi-error" role="alert" class="multi-error"></div>
+    </form>
+    <p class="multi-help">房號可以傳給朋友，密碼請另外告訴對方；加入後每個人會獲得不同代表色。</p>
+  </div>
+  <div id="multi-room" hidden>
+    <div class="multi-panel">
+      <div class="multi-room-head"><div><div class="multi-code" id="multi-room-code">------</div><div id="multi-room-meta" class="multi-room-meta">等待房主開始</div></div><div class="multi-room-actions"><button id="multi-share" class="multi-small-btn">複製邀請</button><button id="multi-leave" class="multi-small-btn danger">離開</button></div></div>
+      <div id="multi-phase" class="multi-phase"><span>房間準備中</span></div>
+      <div id="multi-players" class="multi-players"></div>
+      <div id="multi-host-actions"></div>
+      <div id="multi-room-error" class="multi-error" role="alert"></div>
+    </div>
+    <div id="multi-play-area" hidden>
+      <div id="multi-progress" class="multi-progress"></div>
+      <div class="multi-single-reel"><div class="multi-current-label" id="multi-reel-label">目前抽選 · 主題</div><div class="multi-reel-face" id="multi-reel-face"><span class="icon" id="multi-icon"></span><strong id="multi-item-name">準備抽選</strong><small id="multi-item-en">READY</small></div><button class="multi-spin" id="multi-spin" type="button">SPIN</button></div>
+      <p id="multi-key" class="multi-key">選擇一欄，按 SPIN 就只抽那一欄</p>
+      <div class="multi-panel"><h3>大家抽到什麼？</h3><div id="multi-team" class="multi-team-table"></div><p class="multi-help">同頻加成：已有隊友結果的欄位，有 65% 機率抽到目前最多人持有的選項。全員同欄一致時會自動鎖定。</p></div>
+      <div id="multi-winning" class="multi-winning" hidden></div>
+    </div>
+  </div>
+</section>
+
   <header class="hero"><span class="sun" aria-hidden="true"></span><div class="hello">今天！<br>我們穿什麼？<span>↘</span></div><div class="led-title" aria-hidden="true"><canvas id="led-title-canvas"></canvas></div><div class="title-ch">好運</div><div class="title-en">DressCode</div><div class="title-baba">拉霸</div><div class="banner">和朋友一起抽今天穿什麼 ♥</div><div class="eyes-charm" aria-hidden="true"><div class="eyes-card"><span class="eye left"><span class="pupil"><i class="shine"></i></span></span><span class="eye right"><span class="pupil"><i class="shine"></i></span></span></div></div></header>
   <section class="game" aria-label="互動穿搭拉霸機">
     <div class="head-row"><div class="head red"><div><span class="head-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 4-5 6 4 4 2-2v9h12v-9l2 2 2-4-5-6-4-1-3 4-3-4Z" fill="#fff9ea"/><path d="M12 7h4v14h-4Z" fill="#151518"/></svg></span> 主題</div></div><div class="head blue"><div><span class="head-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C5 2 1 7 1 13s5 10 11 10h3c3 0 4-2 4-4 0-3 4-3 4-7 0-6-5-10-11-10Z" fill="#fff9ea"/><circle cx="7" cy="10" r="2.3" fill="#ff754e"/><circle cx="13" cy="7" r="2.3" fill="#ffcd35"/><circle cx="18" cy="11" r="2.3" fill="#65dc46"/><circle cx="9" cy="17" r="2.3" fill="#151518"/></svg></span> 配色</div></div><div class="head yellow"><div><span class="head-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 9C7 3 2 4 2 10c0 5 5 6 10 4C17 16 22 15 22 10c0-6-5-7-10-1Z" fill="#ff69a3"/><path d="m11 14-4 8 5-3 5 3-4-8Z" fill="#ff754e"/><rect x="10" y="9" width="5" height="6" rx="2" fill="#151518"/></svg></span> 小物</div></div></div>
@@ -657,6 +775,7 @@ const swatchColors={
 function plumpIcon(key){const colors=swatchColors[key];return svg(colors?textile(...colors):(individualIcons[key]||individualIcons.blank)());}
 
 const __plumpIconRaw=plumpIcon; const __iconCache=new Map(); plumpIcon=(key)=>{if(!__iconCache.has(key))__iconCache.set(key,__plumpIconRaw(key));return __iconCache.get(key)};
+window.LuckyFitIcon = plumpIcon;
 const blankValue=['blank','尚未抽選','READY'];
 const state={mode:0,held:[false,false,false],values:[blankValue,blankValue,blankValue],playing:false,spins:0,sound:true,ready:false};
 const reelEls=[0,1,2].map(i=>$('#reel'+i));const holds=$$('[data-hold]');
@@ -895,5 +1014,7 @@ setupLedText();
 })();
 
 </script>
+<div id="slam-overlay" class="slam-overlay" aria-hidden="true"><div id="slam-number" class="slam-number">3</div></div>
+<script src="/multi.js"></script>
 </body>
 </html>

@@ -1,0 +1,9 @@
+{
+  "name": "lucky-fit-club-online",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Lucky Fit Club single-player + cooperative multiplayer rooms",
+  "main": "server.js",
+  "scripts": {"start":"node server.js","test":"node --test"},
+  "engines": {"node":">=20"}
+}
