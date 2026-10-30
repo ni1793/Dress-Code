@@ -29,15 +29,62 @@
 @media(max-width:550px){:root{--slotH:95px}.stage{padding:0 0 38px;background:#fff6e8}.phone{max-width:100%;border-width:0;border-radius:0;box-shadow:none}.screen{border-radius:0}.topbar{height:41px}.hero{height:232px}.hero .title-en{font-size:clamp(49px,12.6vw,66px)}.hero .title-ch{left:27%;font-size:clamp(52px,15vw,63px)}.hero .title-baba{font-size:clamp(33px,11vw,43px)}.game{margin-left:9px;margin-right:9px}.side-sticker,.s-star,.checker{display:none}}
 @media(max-width:370px){:root{--slotH:87px}.hero{height:218px}.hero .title-en{top:88px}.hero .banner{top:194px;font-size:12px}.hero .title-ch{font-size:53px}.hero .title-baba{font-size:33px;top:141px}.head{font-size:14px;height:47px}.head span{font-size:15px}.cell .stamp{font-size:33px}.cell .name{font-size:11px}.flower{font-size:60px}.control{min-height:97px}.spin{height:75px;font-size:34px}.reset{width:67px;height:55px}.mode-btn{padding:7px 8px;font-size:10px}.status{margin-inline:11px}}
 @media(prefers-reduced-motion:reduce){.hero .title-ch,.flower,.s-star{animation:none}.spin{transition:none}}
+
+/* Word Burst: 1.8s, only when a complete draw is revealed. */
+#result .word-burst-wrap{display:inline-block;max-width:100%;position:relative;isolation:isolate;vertical-align:top}
+#result .word-burst-text{display:block;transform-origin:50% 50%;animation:word-burst-pop 1.8s both}
+#result .word-burst-rays{position:absolute;inset:0;pointer-events:none;z-index:2}
+#result .word-burst-ray{position:absolute;left:50%;top:50%;width:4px;height:15px;margin-left:-2px;margin-top:-7.5px;border-radius:9px;background:var(--burst-color,var(--red));opacity:0;transform-origin:center;animation:word-burst-ray 1.8s ease-out both}
+@keyframes word-burst-pop{
+  0%{transform:scale(0);opacity:0}
+  10%{opacity:1;transform:scale(.73)}
+  25%{opacity:1;transform:scale(1.25)}
+  40%{transform:scale(.95)}
+  54%{transform:scale(1.045)}
+  68%,100%{transform:scale(1);opacity:1}
+}
+@keyframes word-burst-ray{
+  0%,11%{opacity:0;transform:rotate(var(--burst-angle)) translateY(0) scale(.45)}
+  19%{opacity:1;transform:rotate(var(--burst-angle)) translateY(-17px) scale(1)}
+  44%{opacity:1;transform:rotate(var(--burst-angle)) translateY(-63px) scale(.95)}
+  76%,100%{opacity:0;transform:rotate(var(--burst-angle)) translateY(-90px) scale(.35)}
+}
+@media (prefers-reduced-motion:reduce){#result .word-burst-text{animation:none}#result .word-burst-rays{display:none}}
+
+/* LED marquee: original headline remains in DOM for accessibility. */
+.hero .led-title{display:none;position:absolute;top:70px;left:17px;right:17px;height:125px;z-index:3;overflow:hidden;border:4px solid var(--yellow);border-radius:18px;background:var(--ink);box-shadow:4px 5px 0 var(--redDeep),inset 0 0 0 2px var(--blueDark);transform:rotate(-1deg)}
+.hero .led-title canvas{width:100%;height:100%;display:block}
+.hero.led-active .led-title{display:block}
+.hero.led-active .title-ch,.hero.led-active .title-en,.hero.led-active .title-baba{display:none}
+/* The heart lives only in the existing result ticket during the spin. */
+.liquid-progress{display:none;position:absolute;top:58px;left:50%;transform:translateX(-50%);width:148px;height:148px;z-index:2;pointer-events:none}
+.liquid-progress svg{display:block;width:100%;height:100%;overflow:visible}
+.liquid-progress .heart-outline{fill:none;stroke:var(--ink);stroke-width:5;stroke-linejoin:round}
+.liquid-progress .heart-number{fill:var(--paper);font:900 28px 'DM Sans','Noto Sans TC',system-ui,sans-serif;paint-order:stroke;stroke:var(--ink);stroke-width:3px;text-anchor:middle;dominant-baseline:middle}
+.liquid-progress .wave-front{animation:liquid-wave-front 1.65s linear infinite}
+.liquid-progress .wave-back{animation:liquid-wave-back 2.4s linear infinite}
+@keyframes liquid-wave-front{from{transform:translateX(0)}to{transform:translateX(-160px)}}
+@keyframes liquid-wave-back{from{transform:translateX(-160px)}to{transform:translateX(0)}}
+.ticket.is-loading .liquid-progress{display:block}
+.ticket.is-loading .ticket-title,.ticket.is-loading #result,.ticket.is-loading #detail{visibility:hidden}
+.ticket.is-loading .detail{padding-bottom:145px}
+/* A single morphological path for the existing non-text background ornaments. */
+.s-star svg{width:100%;height:100%;display:block;overflow:visible;filter:drop-shadow(3px 4px 0 #2223)}
+.hero .doodle{display:block;width:29px;height:29px;transform:rotate(-20deg)}
+.hero .doodle svg{width:100%;height:100%;display:block;overflow:visible}
+@media(max-width:550px){.hero .led-title{top:71px;left:17px;right:17px;height:119px}.hero .doodle{top:13px;left:86px}}
+@media(max-width:370px){.hero .led-title{top:71px;height:108px}.liquid-progress{width:138px;height:138px}.ticket.is-loading .detail{padding-bottom:135px}}
+@media(prefers-reduced-motion:reduce){.liquid-progress .wave-front,.liquid-progress .wave-back{animation:none}}
+
 </style>
 </head>
 <body>
 <div class="stage">
  <div class="checker check-left" aria-hidden="true"></div><div class="checker check-right" aria-hidden="true"></div>
- <div class="side-sticker left" aria-hidden="true">GOOD<br>OUTFIT<br>BETTER<br>FRIENDS</div><div class="side-sticker right" aria-hidden="true">GOOD VIBES<br>ONLY ♡</div><span class="s-star a" aria-hidden="true">★</span><span class="s-star b" aria-hidden="true">★</span><span class="s-star c" aria-hidden="true">✿</span>
+ <div class="side-sticker left" aria-hidden="true">GOOD<br>OUTFIT<br>BETTER<br>FRIENDS</div><div class="side-sticker right" aria-hidden="true">GOOD VIBES<br>ONLY ♡</div><span class="s-star a" aria-hidden="true"><svg viewBox="0 0 100 100"><path class="scroll-morph-path" fill="currentColor"/></svg></span><span class="s-star b" aria-hidden="true"><svg viewBox="0 0 100 100"><path class="scroll-morph-path" fill="currentColor"/></svg></span><span class="s-star c" aria-hidden="true"><svg viewBox="0 0 100 100"><path class="scroll-morph-path" fill="currentColor"/></svg></span>
  <main class="phone"><div class="screen">
   <div class="topbar"><div>LUCKY ✳ CLUB</div><div class="right"><button class="speaker" id="sound" aria-label="切換音效" aria-pressed="true" title="音效開啟／關閉（開啟時有試聽）"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 14h4l5 4V6l-5 4H4z" fill="#fffaf0" stroke="#161616" stroke-width="1.3" stroke-linejoin="round"/><path d="M16 8.5c1.8 1.5 1.8 5.5 0 7" fill="none" stroke="#fffaf0" stroke-width="1.8" stroke-linecap="round"/><path d="M18.7 6c3.3 2.8 3.3 10.2 0 13" fill="none" stroke="#fffaf0" stroke-width="1.6" stroke-linecap="round"/></svg></button></div></div>
-  <header class="hero"><span class="sun" aria-hidden="true"></span><span class="doodle" aria-hidden="true">✳</span><div class="hello">今天！<br>我們穿什麼？<span>↘</span></div><div class="title-ch">好運</div><div class="title-en">DressCode</div><div class="title-baba">拉霸</div><div class="banner">和朋友一起抽今天穿什麼 ♥</div></header>
+  <header class="hero"><span class="sun" aria-hidden="true"></span><span class="doodle" aria-hidden="true"><svg viewBox="0 0 100 100"><path class="scroll-morph-path" fill="var(--red)"/></svg></span><div class="hello">今天！<br>我們穿什麼？<span>↘</span></div><div class="led-title" aria-hidden="true"><canvas id="led-title-canvas"></canvas></div><div class="title-ch">好運</div><div class="title-en">DressCode</div><div class="title-baba">拉霸</div><div class="banner">和朋友一起抽今天穿什麼 ♥</div></header>
   <section class="game" aria-label="互動穿搭拉霸機">
     <div class="head-row"><div class="head red"><div><span class="head-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 4-5 6 4 4 2-2v9h12v-9l2 2 2-4-5-6-4-1-3 4-3-4Z" fill="#fff9ea"/><path d="M12 7h4v14h-4Z" fill="#151518"/></svg></span> 主題</div></div><div class="head blue"><div><span class="head-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C5 2 1 7 1 13s5 10 11 10h3c3 0 4-2 4-4 0-3 4-3 4-7 0-6-5-10-11-10Z" fill="#fff9ea"/><circle cx="7" cy="10" r="2.3" fill="#ff754e"/><circle cx="13" cy="7" r="2.3" fill="#ffcd35"/><circle cx="18" cy="11" r="2.3" fill="#65dc46"/><circle cx="9" cy="17" r="2.3" fill="#151518"/></svg></span> 配色</div></div><div class="head yellow"><div><span class="head-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 9C7 3 2 4 2 10c0 5 5 6 10 4C17 16 22 15 22 10c0-6-5-7-10-1Z" fill="#ff69a3"/><path d="m11 14-4 8 5-3 5 3-4-8Z" fill="#ff754e"/><rect x="10" y="9" width="5" height="6" rx="2" fill="#151518"/></svg></span> 小物</div></div></div>
     <div class="reels" id="reels">
@@ -49,7 +96,19 @@
   <div class="control"><span class="flower" aria-hidden="true"><svg viewBox="0 0 86 86"><g fill="#fffaf0"><ellipse cx="43" cy="18" rx="13" ry="18"/><ellipse cx="60" cy="25" rx="13" ry="18" transform="rotate(44 60 25)"/><ellipse cx="67" cy="43" rx="13" ry="18" transform="rotate(90 67 43)"/><ellipse cx="60" cy="61" rx="13" ry="18" transform="rotate(136 60 61)"/><ellipse cx="43" cy="67" rx="13" ry="18"/><ellipse cx="25" cy="61" rx="13" ry="18" transform="rotate(44 25 61)"/><ellipse cx="19" cy="43" rx="13" ry="18" transform="rotate(90 19 43)"/><ellipse cx="25" cy="25" rx="13" ry="18" transform="rotate(136 25 25)"/></g><circle cx="43" cy="43" r="16" fill="#ffcd35"/><circle cx="37" cy="40" r="2.5" fill="#151518"/><circle cx="50" cy="40" r="2.5" fill="#151518"/><path d="M36 48q7 7 14 0" stroke="#151518" stroke-width="3.5" stroke-linecap="round" fill="none"/></svg></span><button id="spin" class="spin" aria-label="拉霸抽選">SPIN<span class="small">LET'S GO!</span></button><button class="reset" id="reset" aria-label="全部歸零，重新開始"><span class="reset-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 7.8V4.6l-3 3 3 3V8.9a6.6 6.6 0 1 1-1.7 4.4" fill="none" stroke="#24211f" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>全部歸零</button></div>
   <div class="status"><div class="mode-box"><button class="mode-btn selected" data-mode="0" aria-pressed="true">日常好穿</button><button class="mode-btn" data-mode="1" aria-pressed="false">怪趣挑戰</button></div><span class="rounds" id="rounds">SPIN # 000</span></div>
   <p class="caption">✳ 喜歡哪一格，先按 HOLD 鎖住；再按 SPIN 只抽其他欄位。</p>
-  <section class="ticket" id="ticket" aria-live="polite"><div class="ticket-top"><span>✳ TODAY'S OUTFIT ♡</span><span id="serial">NO. 000</span></div><div class="ticket-title">抽出來的是...</div><div class="result" id="result">今天穿什麼？交給命運！</div><div class="detail" id="detail">按下 SPIN，抽出主題 × 配色 × 小物。</div><div class="ticket-actions"><button id="copy" disabled>複製結果 ↗</button><button id="save" disabled>下載穿搭卡 ↗</button></div></section>
+  <section class="ticket" id="ticket" aria-live="polite"><div class="liquid-progress" id="liquid-progress" role="status" aria-label="抽選進度 0%">
+  <svg viewBox="0 0 160 160" aria-hidden="true" focusable="false">
+   <defs><clipPath id="fill-heart-clip"><path d="M80 143C64 128 13 94 13 57C13 37 28 22 48 22C62 22 74 31 80 42C86 31 98 22 112 22C132 22 147 37 147 57C147 94 96 128 80 143Z"/></clipPath></defs>
+   <g clip-path="url(#fill-heart-clip)">
+     <g id="liquid-fill-level" transform="translate(0 162)">
+       <g class="wave-back"><path d="M-160 0Q-120 -10 -80 0T0 0T80 0T160 0T240 0T320 0V175H-160Z" fill="var(--blue)" opacity=".82"/></g>
+       <g class="wave-front"><path d="M-160 0Q-120 10 -80 0T0 0T80 0T160 0T240 0T320 0V175H-160Z" fill="var(--pink)" opacity=".9"/></g>
+     </g>
+   </g>
+   <path class="heart-outline" d="M80 143C64 128 13 94 13 57C13 37 28 22 48 22C62 22 74 31 80 42C86 31 98 22 112 22C132 22 147 37 147 57C147 94 96 128 80 143Z"/>
+   <text class="heart-number" id="liquid-percent" x="80" y="82">0%</text>
+  </svg>
+</div><div class="ticket-top"><span>✳ TODAY'S OUTFIT ♡</span><span id="serial">NO. 000</span></div><div class="ticket-title">抽出來的是...</div><div class="result" id="result">今天穿什麼？交給命運！</div><div class="detail" id="detail">按下 SPIN，抽出主題 × 配色 × 小物。</div><div class="ticket-actions"><button id="copy" disabled>複製結果 ↗</button><button id="save" disabled>下載穿搭卡 ↗</button></div></section>
   <div class="footer">HAVE A FUN OUTFIT DAY!</div>
  </div></main>
 </div>
@@ -153,14 +212,115 @@ rollAudio.volume=.90;stopAudio.volume=.87;winAudio.volume=.88;
 function playSfx(el){if(!state.sound)return;try{el.pause();el.currentTime=0;const p=el.play();if(p&&p.catch)p.catch(()=>{ /* device silent mode or browser policy */ });}catch(e){}}
 function stopRollSound(){try{rollAudio.pause();rollAudio.currentTime=0}catch(e){}}
 function startRollSound(){if(!state.sound)return;try{stopRollSound();const p=rollAudio.play();if(p&&p.catch)p.catch(()=>{});}catch(e){}}
+
+// Tiny LED matrix renderer: real lit/dark circular dots, continuous right-to-left movement.
+function setupLedText(){
+  const hero=$('.hero'),cv=$('#led-title-canvas');if(!hero||!cv)return;
+  const meter=document.createElement('canvas'),m=meter.getContext('2d',{willReadFrequently:true});
+  const headline=['.title-ch','.title-en','.title-baba'].map(sel=>$(sel).textContent.trim()).join('  ');
+  m.font='900 23px "Noto Sans TC", "Arial Black", system-ui, sans-serif';
+  const width=Math.ceil(m.measureText(headline).width)+24;
+  meter.width=width;meter.height=27;
+  m.font='900 23px "Noto Sans TC", "Arial Black", system-ui, sans-serif';
+  m.textBaseline='alphabetic';m.fillStyle='#fff';m.fillText(headline,12,23);
+  const bitmap=m.getImageData(0,0,width,27).data;
+  const rows=26,gap=19,period=width+gap,points=new Uint8Array(width*rows);
+  for(let y=0;y<rows;y++)for(let x=0;x<width;x++)points[y*width+x]=bitmap[(y*width+x)*4+3]>112?1:0;
+  const ctx=cv.getContext('2d'),style=getComputedStyle(document.documentElement);
+  const bright=style.getPropertyValue('--yellow').trim()||'#ffce28';
+  const accent=style.getPropertyValue('--pink').trim()||'#ff83bc';
+  let last=0,offset=0,w=0,h=0,cols=0,frame=0;
+  function resize(){const r=cv.getBoundingClientRect();if(!r.width||!r.height)return;w=r.width;h=r.height;const dpr=Math.min(window.devicePixelRatio||1,2);cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);cols=Math.ceil(w/4.2)+1}
+  resize();window.addEventListener('resize',resize,{passive:true});
+  hero.classList.add('led-active');resize();
+  function draw(t){
+    if(!document.hidden&&w&&h&&t-last>=30){
+      const dt=Math.min((t-(frame||t))/1000,.08);offset=(offset+dt*18)%period;frame=t;last=t;
+      ctx.clearRect(0,0,w,h);
+      const pitch=4.2,rowPitch=3.65,startY=(h-rows*rowPitch)*.5;
+      for(let y=0;y<rows;y++){
+        const py=startY+y*rowPitch;
+        for(let x=0;x<cols;x++){
+          const px=x*pitch+1.2;
+          let idx=Math.floor((x+offset-9)%period);if(idx<0)idx+=period;
+          const lit=idx<width&&points[y*width+idx];
+          ctx.beginPath();ctx.arc(px,py,lit?1.45:1.04,0,Math.PI*2);
+          ctx.fillStyle=lit?(y%7===0?accent:bright):'#574942';ctx.fill();
+        }
+      }
+    }
+    requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
+}
+// Sampling SVG outlines gives a smooth reversible shape-morph, without a paid plugin or CDN.
+function setupScrollMorph(){
+  const paths=$$('.scroll-morph-path');if(!paths.length)return;
+  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('viewBox','0 0 100 100');svg.style.cssText='position:absolute;width:0;height:0;pointer-events:none';
+  const outlines=[
+    'M50 12 A38 38 0 1 1 49.999 12 Z',
+    'M50 8 L60.5 35.6 L90 37 L66.7 55.5 L74.4 84 L50 67.5 L25.6 84 L33.3 55.5 L10 37 L39.5 35.6 Z',
+    'M50 87 C32 71 11 55 11 34 C11 18 26 13 38 17 C45 19 50 25 50 30 C50 25 55 19 62 17 C74 13 89 18 89 34 C89 55 68 71 50 87 Z',
+    'M29 12 H71 Q88 12 88 29 V71 Q88 88 71 88 H29 Q12 88 12 71 V29 Q12 12 29 12 Z'
+  ];
+  const samples=96;const shapes=outlines.map(d=>{const p=document.createElementNS('http://www.w3.org/2000/svg','path');p.setAttribute('d',d);svg.appendChild(p);const len=p.getTotalLength();return Array.from({length:samples},(_,i)=>{const v=p.getPointAtLength(len*i/samples);return [v.x,v.y]})});
+  document.body.appendChild(svg);
+  let target=0,current=0,ticking=false;
+  function onScroll(){const span=Math.max(1,document.documentElement.scrollHeight-innerHeight);target=Math.max(0,Math.min(1,scrollY/span));if(!ticking){ticking=true;requestAnimationFrame(tick)}}
+  window.addEventListener('scroll',onScroll,{passive:true});window.addEventListener('resize',onScroll,{passive:true});onScroll();
+  function tick(){
+    current+=(target-current)*.16; if(Math.abs(target-current)<.0002)current=target;
+    const p=current*3,step=Math.min(2,Math.floor(p)),fraction=p-step;
+    let d='';for(let i=0;i<samples;i++){
+      const a=shapes[step][i],b=shapes[step+1][i];
+      d+=(i?'L':'M')+(a[0]+(b[0]-a[0])*fraction).toFixed(2)+' '+(a[1]+(b[1]-a[1])*fraction).toFixed(2);
+    }
+    d+='Z';paths.forEach((path,i)=>{path.setAttribute('d',d);path.setAttribute('transform','rotate('+(current*270).toFixed(2)+' 50 50)')});
+    if(Math.abs(target-current)>.0002){requestAnimationFrame(tick)}else{ticking=false}
+  }
+}
+const liquid=$('#liquid-progress'),liquidLevel=$('#liquid-fill-level'),liquidPct=$('#liquid-percent');
+let liquidFrame=0,liquidStart=0,liquidDuration=5700;
+function setLiquidPercent(p){const v=Math.max(0,Math.min(100,p));liquidLevel.setAttribute('transform','translate(0 '+(162-(v/100)*162).toFixed(2)+')');liquidPct.textContent=Math.round(v)+'%';liquid.setAttribute('aria-label','抽選進度 '+Math.round(v)+'%')}
+function beginLiquid(duration){
+  cancelAnimationFrame(liquidFrame);liquidDuration=duration;liquidStart=performance.now();setLiquidPercent(0);
+  $('#ticket').classList.add('is-loading');
+  function advance(t){const p=Math.min(99,((t-liquidStart)/liquidDuration)*100);setLiquidPercent(p);if(state.playing)liquidFrame=requestAnimationFrame(advance)}
+  liquidFrame=requestAnimationFrame(advance);
+}
+function finishLiquid(){cancelAnimationFrame(liquidFrame);setLiquidPercent(100);return new Promise(resolve=>setTimeout(()=>{$('#ticket').classList.remove('is-loading');resolve()},180))}
+function clearLiquid(){cancelAnimationFrame(liquidFrame);$('#ticket').classList.remove('is-loading');setLiquidPercent(0)}
+
 let toastTimer;function showToast(t){$('#toast').textContent=t;$('#toast').classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').classList.remove('show'),2000)}
 const soundOnIcon='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 14h4l5 4V6l-5 4H4z" fill="#fffaf0" stroke="#161616" stroke-width="1.3" stroke-linejoin="round"/><path d="M16 8.5c1.8 1.5 1.8 5.5 0 7" fill="none" stroke="#fffaf0" stroke-width="1.8" stroke-linecap="round"/><path d="M18.7 6c3.3 2.8 3.3 10.2 0 13" fill="none" stroke="#fffaf0" stroke-width="1.6" stroke-linecap="round"/></svg>';
 const soundOffIcon='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 14h4l5 4V6l-5 4H4z" fill="#fffaf0" stroke="#161616" stroke-width="1.3" stroke-linejoin="round"/><path d="M16 8.5c1.8 1.5 1.8 5.5 0 7" fill="none" stroke="#fffaf0" stroke-width="1.8" stroke-linecap="round" opacity=".35"/><path d="M18 7 8 17" fill="none" stroke="#ff6b6b" stroke-width="2.2" stroke-linecap="round"/></svg>';
 function renderSoundButton(){const b=$('#sound');b.innerHTML=state.sound?soundOnIcon:soundOffIcon;b.setAttribute('aria-pressed',String(state.sound));}
 
-function renderResult(){state.ready=true;state.spins++;$('#rounds').textContent='SPIN # '+String(state.spins).padStart(3,'0');$('#serial').textContent='NO. '+String(state.spins).padStart(3,'0');$('#result').textContent=state.values[0][1]+' × '+state.values[1][1];$('#detail').textContent='指定小物：'+state.values[2][1]+'。兩個人遵守同一組條件，各自穿出自己的版本 ♡';$('#copy').disabled=false;$('#save').disabled=false;$('#spin').innerHTML='SPIN<span class="small">TRY AGAIN!</span>';playSfx(winAudio)}
+
+function playWordBurst(value){
+  const resultEl=$('#result');
+  resultEl.replaceChildren();
+  const wrap=document.createElement('span');wrap.className='word-burst-wrap';
+  const copy=document.createElement('span');copy.className='word-burst-text';copy.textContent=value;
+  wrap.appendChild(copy);
+  const rays=document.createElement('span');rays.className='word-burst-rays';rays.setAttribute('aria-hidden','true');
+  const palette=['var(--red)','var(--blue)','var(--yellow)','var(--pink)'];
+  for(let i=0;i<12;i++){
+    const line=document.createElement('i');line.className='word-burst-ray';
+    line.style.setProperty('--burst-angle',(i*30)+'deg');
+    line.style.setProperty('--burst-color',palette[i%palette.length]);
+    rays.appendChild(line);
+  }
+  wrap.appendChild(rays);
+  resultEl.appendChild(wrap);
+  // Decorative rays are temporary; the visible result text remains unchanged.
+  rays.addEventListener('animationend',()=>rays.remove(),{once:true});
+}
+function renderResult(){state.ready=true;state.spins++;$('#rounds').textContent='SPIN # '+String(state.spins).padStart(3,'0');$('#serial').textContent='NO. '+String(state.spins).padStart(3,'0');playWordBurst(state.values[0][1]+' × '+state.values[1][1]);$('#detail').textContent='指定小物：'+state.values[2][1]+'。兩個人遵守同一組條件，各自穿出自己的版本 ♡';$('#copy').disabled=false;$('#save').disabled=false;$('#spin').innerHTML='SPIN<span class="small">TRY AGAIN!</span>';playSfx(winAudio)}
 function spin({fresh=false}={}){if(state.playing)return;if(state.held.every(Boolean)&&!fresh){showToast('三格都 HOLD 了，先解開至少一格 ♡');return}state.playing=true;startRollSound();$('#spin').disabled=true;$('#reset').disabled=true;holds.forEach(b=>b.disabled=true);$$('[data-mode]').forEach(b=>b.disabled=true);$('#result').textContent='命運正在挑衣服…';$('#detail').textContent='主題、配色、小物依序揭曉！';beep(330,.08,'square',.02);
 const minMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;const rowH=$('.cell').getBoundingClientRect().height;
+const runningReels=[0,1,2].filter(i=>!state.held[i]||fresh);const longest=minMotion?100:3900+900*Math.max(...runningReels);beginLiquid(longest+70);
 const moves=[];
 for(let i=0;i<3;i++){
 if(state.held[i]&&!fresh)continue;
@@ -168,12 +328,12 @@ const options=lists[state.mode][i];let final=sample(options);for(let k=0;k<16&&f
 const count=minMotion?2:33+i*7;const sequence=[sample(options),state.values[i],...Array.from({length:count},()=>sample(options)),final,sample(options)];const reel=reelEls[i];const index=sequence.length-2;const dur=minMotion?100:3900+900*i;
 reel.style.transition='none';reel.style.transform='translateY(0)';reel.replaceChildren(...sequence.map(cell));reel.parentElement.setAttribute('aria-busy','true');void reel.offsetHeight;
 moves.push(new Promise(resolve=>{requestAnimationFrame(()=>requestAnimationFrame(()=>{reel.style.transition=`transform ${dur}ms cubic-bezier(.12,.78,.11,1)`;reel.style.transform=`translateY(${-(index-1)*rowH}px)`}));setTimeout(()=>{state.values[i]=final;setIdle(i);playSfx(stopAudio);resolve()},dur+70)}))}
-Promise.all(moves).then(()=>{stopRollSound();state.playing=false;$('#spin').disabled=false;$('#reset').disabled=false;holds.forEach(b=>b.disabled=false);$$('[data-mode]').forEach(b=>b.disabled=false);renderResult()})}
+Promise.all(moves).then(async()=>{stopRollSound();await finishLiquid();state.playing=false;$('#spin').disabled=false;$('#reset').disabled=false;holds.forEach(b=>b.disabled=false);$$('[data-mode]').forEach(b=>b.disabled=false);renderResult()})}
 function resetHeld(){state.held=[false,false,false];holds.forEach(b=>{b.classList.remove('chosen');b.setAttribute('aria-pressed','false');b.textContent='◇ HOLD'})}
 // '全部歸零' returns the game to its original unopened state; it does not spin.
 function resetAll(){
   if(state.playing)return;
-  stopRollSound();try{stopAudio.pause();winAudio.pause()}catch(e){}resetHeld();
+  clearLiquid();stopRollSound();try{stopAudio.pause();winAudio.pause()}catch(e){}resetHeld();
   state.mode=0;state.spins=0;state.ready=false;
   state.values=[blankValue,blankValue,blankValue];
   $$('[data-mode]').forEach(b=>{const selected=Number(b.dataset.mode)===0;b.classList.toggle('selected',selected);b.setAttribute('aria-pressed',String(selected))});
@@ -276,6 +436,7 @@ async function saveOutfitCard(){
 $('#save').addEventListener('click',saveOutfitCard);
 renderSoundButton();
 for(let i=0;i<3;i++)setBlank(i);
+setupLedText();setupScrollMorph();
 })();
 </script>
 </body>
