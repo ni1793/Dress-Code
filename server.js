@@ -98,7 +98,7 @@ async function handler(req,res){
       fail(res,410,'舊網站已停用，請使用新的 LUCKY CLUB 網址');return;
     }
     const pathnameAndQuery=new URL(req.url,'http://retired.local');
-    const base=process.env.LUCKY_CLUB_REDIRECT_URL.replace(/\\/$/,'');
+    const base=process.env.LUCKY_CLUB_REDIRECT_URL.replace(/\/$/,'');
     res.writeHead(302,{'Location':base+pathnameAndQuery.pathname+pathnameAndQuery.search,
       'Cache-Control':'no-store','X-Robots-Tag':'noindex, nofollow'});
     res.end();return;
