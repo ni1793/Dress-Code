@@ -629,6 +629,23 @@ body::after,.stage::after{display:none !important;content:none !important}
 .bgm-button[aria-pressed="true"] .bgm-indicator{background:#ff4eb1;box-shadow:0 0 0 2px #fff}
 @media(max-width:420px){.topbar .right{right:9px;gap:5px}.topbar>div:first-child{min-width:112px;padding:9px 13px;font-size:12px}.topbar .speaker,.topbar .bgm-button{width:34px;height:34px}.topbar .bgm-button svg{width:17px;height:17px}}
 </style>
+
+<style id="multi-personal-picks-fix">
+.stage.is-multi .multi-team-row .outcome.same-pick{
+  display:block;min-width:0;border-radius:8px;padding:6px 2px;
+  background:var(--match-bg);color:var(--match-ink);
+  box-shadow:inset 0 0 0 2px var(--match-border);
+  font-weight:950;line-height:1.24;
+}
+.stage.is-multi .multi-match-note{
+  padding:8px 9px 9px;text-align:center;border-top:1px solid #e6e6ec;
+  font-size:10px;line-height:1.55;font-weight:750;color:#626779;background:#fafbff;
+}
+@media(max-width:370px){
+  .stage.is-multi .multi-team-row .outcome.same-pick{padding:5px 1px;border-radius:6px}
+  .stage.is-multi .multi-match-note{font-size:9px;padding:7px 5px}
+}
+</style>
 </head>
 <body>
 <div class="stage">
@@ -1110,7 +1127,7 @@ setupLedText();
 
 </script>
 <div id="slam-overlay" class="slam-overlay" aria-hidden="true"><div id="slam-number" class="slam-number">3</div></div>
-<script src="/multi.js"></script>
+<script src="/multi.js?v=personal-picks-20261030"></script>
 <audio id="club-background-music" preload="none" loop src="/dewdrops-on-glass.mp3" aria-hidden="true"></audio>
 <script id="lucky-club-bgm-script">
 (() => {
