@@ -39,12 +39,17 @@
     return body;
   }
   function setScreen(toMulti){
+    if(toMulti && window.LuckyClubSoloSpinning?.()){
+      toast('單機轉盤正在轉動，停下後再切換模式 ♡');return;
+    }
+    const wasMulti=stage.classList.contains('is-multi');
     stage.classList.toggle('is-multi',toMulti);
     $('#solo-mode').classList.toggle('active',!toMulti);
     $('#multi-mode').classList.toggle('active',toMulti);
     $('#solo-mode').setAttribute('aria-selected',String(!toMulti));
     $('#multi-mode').setAttribute('aria-selected',String(toMulti));
     if(toMulti && room)render();
+    if(!toMulti && wasMulti)requestAnimationFrame(()=>window.LuckyClubRestoreSoloReels?.());
   }
   $('#solo-mode').addEventListener('click',()=>setScreen(false));
   $('#multi-mode').addEventListener('click',()=>setScreen(true));
@@ -249,7 +254,13 @@
       countdownToken=token;
       const number=$('#slam-number');number.classList.remove('go');number.textContent=tokens[step];
       if(step===3)number.classList.add('go');
-      number.style.animation='none';void number.offsetHeight;number.style.animation='';
+      number.style.animation='none';
+      number.style.transform='scale(1)';
+      const naturalWidth=number.getBoundingClientRect().width;
+      const available=Math.max(150,window.innerWidth-32);
+      number.style.setProperty('--slam-scale',String(Math.max(1,Math.min(3,available/Math.max(1,naturalWidth))).toFixed(3)));
+      void number.offsetHeight;
+      number.style.transform='';number.style.animation='';
     }
   }
   setInterval(updateSlam,80);

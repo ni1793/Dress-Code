@@ -580,7 +580,44 @@ body::after,.stage::after{display:none !important;content:none !important}
 .multi-pick.current{background:#ff8cca;box-shadow:0 0 0 3px #f44aac,0 6px 0 #bf2782}
 .multi-pick.upcoming{opacity:.52}
 .multi-round-status{font-size:12px;font-weight:850;line-height:1.5;color:#252735;padding:9px 12px;background:#fff7cf;border-radius:13px;margin-top:8px}
-</style></head>
+</style>
+<style id="multi-switch-responsive-fix">
+.stage.is-multi .multiplayer-view button{min-width:0;max-width:100%;line-height:1.32;overflow-wrap:anywhere;word-break:normal}
+.stage.is-multi .multi-panel{min-width:0;max-width:100%}
+.stage.is-multi .multi-tabs,.stage.is-multi .multi-duo,.stage.is-multi .multi-room-actions{min-width:0;max-width:100%}
+.stage.is-multi .multi-tabs button,.stage.is-multi .multi-duo button{font-size:12px;padding:9px 6px;border-radius:13px;min-width:0}
+.stage.is-multi .multi-submit{font-size:14px;line-height:1.3;padding:11px 9px;border-width:3px;min-height:46px}
+.stage.is-multi .multi-small-btn{font-size:10px;padding:7px;line-height:1.2;white-space:normal;min-width:0}
+.stage.is-multi .multi-spin{font-size:19px;min-height:64px;height:auto;padding:10px 7px;max-width:100%}
+.stage.is-multi .multi-pick{padding:8px 3px;min-width:0;min-height:77px}
+.stage.is-multi .multi-pick .category{font-size:11px;line-height:1.25}
+.stage.is-multi .multi-pick .value{font-size:10px;line-height:1.3;overflow-wrap:anywhere}
+.stage.is-multi .multi-pick .lock{font-size:9px;line-height:1.25}
+.stage.is-multi .multi-room-head{flex-wrap:wrap;row-gap:8px}
+.stage.is-multi .multi-room-head>div:first-child{min-width:0;flex:1 1 125px}
+.stage.is-multi .multi-room-actions{min-width:0;flex:0 1 auto}
+.stage.is-multi #multi-ticket .ticket-actions button{font-size:11px;line-height:1.35;padding:9px 6px;min-width:0}
+.stage.is-multi .multi-team-head,.stage.is-multi .multi-team-row{grid-template-columns:minmax(65px,1.15fr) repeat(3,minmax(0,1fr));min-width:0}
+.slam-overlay{overflow:hidden;box-sizing:border-box;width:100%;max-width:100vw;padding:0 10px}
+.slam-number{display:inline-block;max-width:calc(100vw - 24px);white-space:nowrap;text-align:center;transform-origin:center center}
+.slam-number.go{font-size:clamp(40px,8.7vw,84px)}
+@keyframes numberSlam{0%{transform:translateY(-48px) scale(var(--slam-scale,3));opacity:.22;filter:blur(5px)}30%{transform:translateY(13px) scale(.91);opacity:1;filter:blur(0)}55%{transform:translateY(-11px) scale(1.12)}78%{transform:translateY(4px) scale(.98)}100%{transform:translateY(0) scale(1);opacity:1}}
+@media(max-width:600px){
+.stage.is-multi .multiplayer-view{padding-inline:9px}
+.stage.is-multi .multi-panel{padding:14px 10px}
+.stage.is-multi .multi-tabs button,.stage.is-multi .multi-duo button{font-size:clamp(10px,2.9vw,11px);padding:8px 3px}
+.stage.is-multi .multi-submit{font-size:clamp(11px,3.25vw,13px);padding:10px 5px;min-height:44px}
+.stage.is-multi .multi-small-btn{font-size:10px;padding:6px 5px}
+.stage.is-multi .multi-spin{font-size:clamp(14px,4vw,17px);min-height:60px;padding:9px 6px}
+.stage.is-multi .multi-title h2{font-size:clamp(25px,7.9vw,33px)}
+.stage.is-multi .multi-reel-face strong{font-size:clamp(15px,5.2vw,19px)}
+.slam-number{font-size:clamp(48px,20vw,92px);letter-spacing:-.045em}
+.slam-number.go{font-size:clamp(37px,12vw,54px);letter-spacing:-.035em}
+}
+@media(max-width:365px){.stage.is-multi .multi-room-actions{gap:3px}.stage.is-multi .multi-small-btn{padding:6px 4px;font-size:9px}.stage.is-multi .multi-pick .category{font-size:10px}.stage.is-multi .multi-pick .value{font-size:9px}.stage.is-multi .multi-tabs button{font-size:10px}}
+@media(prefers-reduced-motion:reduce){.slam-number{animation-duration:.18s}}
+</style>
+</head>
 <body>
 <div class="stage">
  <div class="mode-switch" role="tablist" aria-label="遊戲模式"><button type="button" id="solo-mode" class="active" aria-selected="true">單機模式</button><button type="button" id="multi-mode" aria-selected="false">多人連線</button></div>
@@ -795,7 +832,15 @@ const swatchColors={
 };
 function plumpIcon(key){const colors=swatchColors[key];return svg(colors?textile(...colors):(individualIcons[key]||individualIcons.blank)());}
 
-const __plumpIconRaw=plumpIcon; const __iconCache=new Map(); plumpIcon=(key)=>{if(!__iconCache.has(key))__iconCache.set(key,__plumpIconRaw(key));return __iconCache.get(key)};
+// Each SVG must own its gradient IDs; shared paint-* IDs could break after hiding the reels.
+const __plumpIconRaw=plumpIcon;
+const __iconCache=new Map();
+let __iconPaintSeq=0;
+plumpIcon=(key)=>{
+  if(!__iconCache.has(key))__iconCache.set(key,__plumpIconRaw(key));
+  const prefix='lci'+(++__iconPaintSeq)+'-';
+  return __iconCache.get(key).replace(/paint-([A-Za-z0-9_-]+)/g, (_,name)=>prefix+'paint-'+name);
+};
 window.LuckyClubIcon = window.LuckyFitIcon = plumpIcon;
 const blankValue=['blank','尚未抽選','READY'];
 const state={mode:0,held:[false,false,false],values:[blankValue,blankValue,blankValue],playing:false,spins:0,sound:true,ready:false};
@@ -1017,6 +1062,12 @@ const leverControl=$('.control');
 $('#spin').addEventListener('click',()=>{leverControl.classList.remove('lever-pulled');void leverControl.offsetWidth;leverControl.classList.add('lever-pulled');setTimeout(()=>leverControl.classList.remove('lever-pulled'),440)});
 renderSoundButton();
 for(let i=0;i<3;i++){state.values[i]=sample(lists[state.mode][i]);setIdle(i);}
+window.LuckyClubSoloSpinning=()=>state.playing;
+window.LuckyClubRestoreSoloReels=()=>{
+  if(state.playing)return false;
+  for(let i=0;i<3;i++)setIdle(i);
+  return true;
+};
 setupLedText();
 })();
 
