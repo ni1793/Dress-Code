@@ -91,6 +91,18 @@ function prunePlayer(room,id){
 async function readJson(req){let data='';for await(const chunk of req){data+=chunk;if(Buffer.byteLength(data)>MAX_BYTES)throw Error('資料太長');}try{return JSON.parse(data||'{}')}catch(e){throw Error('資料格式不正確')}}
 function requireMember(req,res){const info=memberFromRequest(req);if(!info)fail(res,401,'請先加入房間');return info;}
 async function handler(req,res){
+  // Render's retired site forwards visitors to the canonical LUCKY CLUB URL.
+  // The new service does not set this env variable and keeps all game APIs.
+  if(process.env.LUCKY_CLUB_REDIRECT_URL){
+    if(req.method!=='GET'&&req.method!=='HEAD'){
+      fail(res,410,'舊網站已停用，請使用新的 LUCKY CLUB 網址');return;
+    }
+    const pathnameAndQuery=new URL(req.url,'http://retired.local');
+    const base=process.env.LUCKY_CLUB_REDIRECT_URL.replace(/\\/$/,'');
+    res.writeHead(302,{'Location':base+pathnameAndQuery.pathname+pathnameAndQuery.search,
+      'Cache-Control':'no-store','X-Robots-Tag':'noindex, nofollow'});
+    res.end();return;
+  }
   const pathname=new URL(req.url,'http://local.test').pathname;
   if(pathname==='/health'){json(res,200,{ok:true,roomCount:rooms.size});return;}
   if(pathname==='/api/me' && req.method==='GET'){
