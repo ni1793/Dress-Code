@@ -53,3 +53,7 @@ npm start
 - `public/multi.js` — 多人前端、代表色、單一轉盤、共享結果
 - `public/catalog.json` — 單機與多人使用相同題庫
 - `render.yaml` — Render Web Service 設定
+
+## 背景音樂
+
+已加入《Dewdrops on Glass》，網站右上角音符鍵可循環播放／暫停（預設 20% 音量），不影響音效開關。手機和桌面瀏覽器通常需要點擊後才能播放。音檔為 `public/dewdrops-on-glass.mp3`。

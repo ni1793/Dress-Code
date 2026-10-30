@@ -617,6 +617,18 @@ body::after,.stage::after{display:none !important;content:none !important}
 @media(max-width:365px){.stage.is-multi .multi-room-actions{gap:3px}.stage.is-multi .multi-small-btn{padding:6px 4px;font-size:9px}.stage.is-multi .multi-pick .category{font-size:10px}.stage.is-multi .multi-pick .value{font-size:9px}.stage.is-multi .multi-tabs button{font-size:10px}}
 @media(prefers-reduced-motion:reduce){.slam-number{animation-duration:.18s}}
 </style>
+<style id="lucky-club-bgm-style">
+/* Background music is independent from the existing sound effects. */
+.topbar .right{display:flex;align-items:center;gap:6px}
+.bgm-button{position:relative;display:grid;place-items:center;flex:0 0 auto;width:38px;height:38px;padding:0;border:2px solid #20202a;border-radius:50%;color:#20202a;background:linear-gradient(145deg,#fffefa,#e5eaf0);box-shadow:0 4px 0 #9198a7,inset 0 2px 0 #fff;cursor:pointer;transition:background .18s ease,transform .18s ease,box-shadow .18s ease}
+.bgm-button:hover{transform:translateY(-1px)}
+.bgm-button:active{transform:translateY(2px);box-shadow:0 2px 0 #9198a7}
+.bgm-button svg{display:block;width:18px;height:18px;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;fill:none}
+.bgm-button[aria-pressed="true"]{background:linear-gradient(145deg,#eaff89,#b8ed20);box-shadow:0 4px 0 #83ab1b,inset 0 2px 0 #fff9}
+.bgm-button .bgm-indicator{position:absolute;right:1px;top:1px;width:7px;height:7px;border-radius:50%;background:#a8acb6;border:1px solid #fff}
+.bgm-button[aria-pressed="true"] .bgm-indicator{background:#ff4eb1;box-shadow:0 0 0 2px #fff}
+@media(max-width:420px){.topbar .right{right:9px;gap:5px}.topbar>div:first-child{min-width:112px;padding:9px 13px;font-size:12px}.topbar .speaker,.topbar .bgm-button{width:34px;height:34px}.topbar .bgm-button svg{width:17px;height:17px}}
+</style>
 </head>
 <body>
 <div class="stage">
@@ -627,7 +639,7 @@ body::after,.stage::after{display:none !important;content:none !important}
  <span class="bg-flower f2" aria-hidden="true"><svg viewBox="0 0 200 200" focusable="false" role="presentation" xmlns="http://www.w3.org/2000/svg"><g><g fill="#7fa959"><ellipse cx="100" cy="46" rx="27" ry="41" transform="rotate(0 100 100) translate(0 8)"/><ellipse cx="100" cy="46" rx="27" ry="41" transform="rotate(45 100 100) translate(0 8)"/><ellipse cx="100" cy="46" rx="27" ry="41" transform="rotate(90 100 100) translate(0 8)"/><ellipse cx="100" cy="46" rx="27" ry="41" transform="rotate(135 100 100) translate(0 8)"/><ellipse cx="100" cy="46" rx="27" ry="41" transform="rotate(180 100 100) translate(0 8)"/><ellipse cx="100" cy="46" rx="27" ry="41" transform="rotate(225 100 100) translate(0 8)"/><ellipse cx="100" cy="46" rx="27" ry="41" transform="rotate(270 100 100) translate(0 8)"/><ellipse cx="100" cy="46" rx="27" ry="41" transform="rotate(315 100 100) translate(0 8)"/></g><g fill="#fffdf9"><ellipse cx="100" cy="43" rx="27" ry="41" transform="rotate(0 100 100)"/><ellipse cx="100" cy="43" rx="27" ry="41" transform="rotate(45 100 100)"/><ellipse cx="100" cy="43" rx="27" ry="41" transform="rotate(90 100 100)"/><ellipse cx="100" cy="43" rx="27" ry="41" transform="rotate(135 100 100)"/><ellipse cx="100" cy="43" rx="27" ry="41" transform="rotate(180 100 100)"/><ellipse cx="100" cy="43" rx="27" ry="41" transform="rotate(225 100 100)"/><ellipse cx="100" cy="43" rx="27" ry="41" transform="rotate(270 100 100)"/><ellipse cx="100" cy="43" rx="27" ry="41" transform="rotate(315 100 100)"/></g><circle cx="100" cy="100" r="35" fill="#f1c40f"/><circle cx="88" cy="96" r="4.8" fill="#121212"/><circle cx="112" cy="96" r="4.8" fill="#121212"/><path d="M86 112 Q100 123 114 112" fill="none" stroke="#121212" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></g></svg></span>
  <span class="bg-flower f3" aria-hidden="true"><svg viewBox="0 0 200 200" focusable="false" role="presentation" xmlns="http://www.w3.org/2000/svg"><g><g fill="#7fa959"><ellipse cx="100" cy="46" rx="27" ry="41" transform="rotate(0 100 100) translate(0 8)"/><ellipse cx="100" cy="46" rx="27" ry="41" transform="rotate(45 100 100) translate(0 8)"/><ellipse cx="100" cy="46" rx="27" ry="41" transform="rotate(90 100 100) translate(0 8)"/><ellipse cx="100" cy="46" rx="27" ry="41" transform="rotate(135 100 100) translate(0 8)"/><ellipse cx="100" cy="46" rx="27" ry="41" transform="rotate(180 100 100) translate(0 8)"/><ellipse cx="100" cy="46" rx="27" ry="41" transform="rotate(225 100 100) translate(0 8)"/><ellipse cx="100" cy="46" rx="27" ry="41" transform="rotate(270 100 100) translate(0 8)"/><ellipse cx="100" cy="46" rx="27" ry="41" transform="rotate(315 100 100) translate(0 8)"/></g><g fill="#fffdf9"><ellipse cx="100" cy="43" rx="27" ry="41" transform="rotate(0 100 100)"/><ellipse cx="100" cy="43" rx="27" ry="41" transform="rotate(45 100 100)"/><ellipse cx="100" cy="43" rx="27" ry="41" transform="rotate(90 100 100)"/><ellipse cx="100" cy="43" rx="27" ry="41" transform="rotate(135 100 100)"/><ellipse cx="100" cy="43" rx="27" ry="41" transform="rotate(180 100 100)"/><ellipse cx="100" cy="43" rx="27" ry="41" transform="rotate(225 100 100)"/><ellipse cx="100" cy="43" rx="27" ry="41" transform="rotate(270 100 100)"/><ellipse cx="100" cy="43" rx="27" ry="41" transform="rotate(315 100 100)"/></g><circle cx="100" cy="100" r="35" fill="#f1c40f"/><circle cx="88" cy="96" r="4.8" fill="#121212"/><circle cx="112" cy="96" r="4.8" fill="#121212"/><path d="M86 112 Q100 123 114 112" fill="none" stroke="#121212" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></g></svg></span>
  <main class="phone"><div class="screen">
-  <div class="topbar"><div>LUCKY ✳ CLUB</div><div class="right"><button class="speaker" id="sound" aria-label="切換音效" aria-pressed="true" title="音效開啟／關閉（開啟時有試聽）"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 14h4l5 4V6l-5 4H4z" fill="#fffaf0" stroke="#161616" stroke-width="1.3" stroke-linejoin="round"/><path d="M16 8.5c1.8 1.5 1.8 5.5 0 7" fill="none" stroke="#fffaf0" stroke-width="1.8" stroke-linecap="round"/><path d="M18.7 6c3.3 2.8 3.3 10.2 0 13" fill="none" stroke="#fffaf0" stroke-width="1.6" stroke-linecap="round"/></svg></button></div></div>
+  <div class="topbar"><div>LUCKY ✳ CLUB</div><div class="right"><button type="button" id="bgm-toggle" class="bgm-button" aria-label="播放背景音樂" aria-pressed="false" title="Dewdrops on Glass · 點擊播放背景音樂"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 18V5l11-2v13"/><circle cx="6.5" cy="18" r="3.4"/><circle cx="17.5" cy="16" r="3.4"/></svg><span class="bgm-indicator" aria-hidden="true"></span></button><button class="speaker" id="sound" aria-label="切換音效" aria-pressed="true" title="音效開啟／關閉（開啟時有試聽）"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 14h4l5 4V6l-5 4H4z" fill="#fffaf0" stroke="#161616" stroke-width="1.3" stroke-linejoin="round"/><path d="M16 8.5c1.8 1.5 1.8 5.5 0 7" fill="none" stroke="#fffaf0" stroke-width="1.8" stroke-linecap="round"/><path d="M18.7 6c3.3 2.8 3.3 10.2 0 13" fill="none" stroke="#fffaf0" stroke-width="1.6" stroke-linecap="round"/></svg></button></div></div>
   
 <section class="multiplayer-view" id="multiplayer-view" aria-label="多人連線房間">
   <div class="multi-title"><span class="micro">LUCKY CLUB · ONLINE</span><h2>一起抽到一樣！</h2><p class="sub">每人一色・全員抽完才揭曉・平手全員重抽</p></div>
@@ -1099,5 +1111,42 @@ setupLedText();
 </script>
 <div id="slam-overlay" class="slam-overlay" aria-hidden="true"><div id="slam-number" class="slam-number">3</div></div>
 <script src="/multi.js"></script>
+<audio id="club-background-music" preload="none" loop src="/dewdrops-on-glass.mp3" aria-hidden="true"></audio>
+<script id="lucky-club-bgm-script">
+(() => {
+  const music = document.getElementById('club-background-music');
+  const button = document.getElementById('bgm-toggle');
+  if (!music || !button) return;
+  music.volume = 0.20;
+  // Browser autoplay policies require the listener to press this button first.
+  function render() {
+    const playing = !music.paused && !music.ended;
+    button.setAttribute('aria-pressed', String(playing));
+    button.setAttribute('aria-label', playing ? '暫停背景音樂' : '播放背景音樂');
+    button.title = 'Dewdrops on Glass · ' + (playing ? '點擊暫停背景音樂' : '點擊播放背景音樂');
+  }
+  button.addEventListener('click', async () => {
+    if (!music.paused) {
+      music.pause();
+      return;
+    }
+    button.disabled = true;
+    try {
+      await music.play();
+    } catch (error) {
+      // A browser can block sound before a gesture or when output is unavailable.
+      music.pause();
+      if (typeof showToast === 'function') showToast('請點音樂鍵開啟背景音樂 ♡');
+    } finally {
+      button.disabled = false;
+      render();
+    }
+  });
+  for (const eventName of ['playing', 'pause', 'ended', 'error']) {
+    music.addEventListener(eventName, render);
+  }
+  render();
+})();
+</script>
 </body>
 </html>

@@ -180,8 +180,8 @@ async function handler(req,res){
   }
   if(req.method!=='GET'&&req.method!=='HEAD'){fail(res,405,'不支援此操作');return;}
   const allowed = pathname==='/'?'index.html':pathname.slice(1);
-  if(!['index.html','catalog.json','multi.js','favicon.png','apple-touch-icon.png'].includes(allowed)){fail(res,404,'找不到頁面');return;}
-  try{const data=fs.readFileSync(path.join(PUBLIC,allowed));const types={'.html':'text/html; charset=utf-8','.json':'application/json; charset=utf-8','.js':'application/javascript; charset=utf-8','.png':'image/png'};
+  if(!['index.html','catalog.json','multi.js','favicon.png','apple-touch-icon.png','dewdrops-on-glass.mp3'].includes(allowed)){fail(res,404,'找不到頁面');return;}
+  try{const data=fs.readFileSync(path.join(PUBLIC,allowed));const types={'.html':'text/html; charset=utf-8','.json':'application/json; charset=utf-8','.js':'application/javascript; charset=utf-8','.png':'image/png','.mp3':'audio/mpeg'};
     res.writeHead(200,{'Content-Type':types[path.extname(allowed)]||'application/octet-stream','Cache-Control':allowed==='index.html'?'no-store':'public, max-age=3600','X-Content-Type-Options':'nosniff'});res.end(req.method==='HEAD'?undefined:data);
   }catch(e){fail(res,404,'找不到檔案');}
 }
