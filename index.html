@@ -193,7 +193,87 @@ $('#sound').addEventListener('click',()=>{state.sound=!state.sound;if(!state.sou
 function resultText(){return '🎲 好運 Dress Code 拉霸 🎲\n主題：'+state.values[0][1]+'\n配色：'+state.values[1][1]+'\n指定小物：'+state.values[2][1]+'\n\n兩個人，同一組條件，各自穿出自己的版本 ♡'}
 $('#copy').addEventListener('click',async()=>{if(!state.ready)return;try{await navigator.clipboard.writeText(resultText());showToast('已複製！貼給朋友就可以 ♡')}catch(e){const ta=document.createElement('textarea');ta.value=resultText();document.body.appendChild(ta);ta.select();try{document.execCommand('copy');showToast('已複製 ♡')}catch(e){showToast('可以直接截圖分享 ♡')}ta.remove()}});
 function wrapText(ctx,text,maxWidth){const out=[];let current='';for(const char of text){if(ctx.measureText(current+char).width>maxWidth&&current){out.push(current);current=char}else current+=char}if(current)out.push(current);return out}
-$('#save').addEventListener('click',()=>{if(!state.ready)return;const canvas=document.createElement('canvas');canvas.width=900;canvas.height=1160;const c=canvas.getContext('2d');c.fillStyle='#fff7e8';c.fillRect(0,0,900,1160);c.fillStyle='#ff472f';c.fillRect(0,0,900,32);c.fillStyle='#1764ff';c.fillRect(0,32,900,18);c.textBaseline='alphabetic';c.fillStyle='#27211f';c.font='900 30px system-ui';c.fillText('LUCKY ✳ FIT CLUB',75,125);c.font='900 97px system-ui';c.fillStyle='#ff472f';c.fillText('DRESS',65,245);c.fillStyle='#1764ff';c.fillText('CODE!',65,350);c.fillStyle='#29211e';c.font='900 37px system-ui';c.fillText('穿搭抽選結果',70,440);c.fillStyle='#ffdd3b';c.fillRect(65,484,770,94);c.fillStyle='#26211e';c.font='800 31px system-ui';c.fillText('✳  THIS IS OUR LUCKY LOOK',89,543);const blocks=[['01','穿搭主題',state.values[0][1],'#ff4b34'],['02','指定配色',state.values[1][1],'#1764ff'],['03','必備小物',state.values[2][1],'#ffcf30']];blocks.forEach((b,i)=>{const y=604+i*140;c.fillStyle='#28231f';c.fillRect(70,y,760,119);c.fillStyle=b[3];c.fillRect(70,y,150,119);c.fillStyle='#fff9e8';c.font='900 45px system-ui';c.fillText(b[0],103,y+76);c.fillStyle='#fff9e8';c.font='700 24px system-ui';c.fillText(b[1],245,y+42);c.font='900 39px system-ui';c.fillText(b[2],245,y+94)});c.fillStyle='#2d2725';c.font='700 25px system-ui';c.fillText('TWO FRIENDS · ONE DRESS CODE ♡',90,1100);const a=document.createElement('a');a.download='Dress_Code_好運拉霸_'+String(state.spins).padStart(3,'0')+'.png';a.href=canvas.toDataURL('image/png');document.body.appendChild(a);a.click();a.remove();showToast('穿搭結果卡已下載 ✳')});
+function roundedRect(ctx,x,y,w,h,r){const rr=Math.min(r,w/2,h/2);ctx.beginPath();ctx.moveTo(x+rr,y);ctx.arcTo(x+w,y,x+w,y+h,rr);ctx.arcTo(x+w,y+h,x,y+h,rr);ctx.arcTo(x,y+h,x,y,rr);ctx.arcTo(x,y,x+w,y,rr);ctx.closePath()}
+function wrapLines(ctx,text,maxWidth){const chars=[...(text||'')];const lines=[];let line='';for(const ch of chars){const test=line+ch;if(ctx.measureText(test).width>maxWidth&&line){lines.push(line);line=ch}else line=test}if(line)lines.push(line);return lines}
+function drawMultiLine(ctx,text,x,y,maxWidth,lineHeight,maxLines=99){const lines=wrapLines(ctx,text,maxWidth).slice(0,maxLines);lines.forEach((line,i)=>ctx.fillText(line,x,y+i*lineHeight));return lines.length}
+function outfitCardCanvas(){
+  const canvas=document.createElement('canvas');canvas.width=1080;canvas.height=1350;const c=canvas.getContext('2d');
+  const rootStyle=getComputedStyle(document.documentElement);
+  const colors={cream:rootStyle.getPropertyValue('--cream').trim()||'#fff7e8',paper:rootStyle.getPropertyValue('--paper').trim()||'#fffdf6',red:rootStyle.getPropertyValue('--red').trim()||'#ff492e',blue:rootStyle.getPropertyValue('--blue').trim()||'#1764ff',yellow:rootStyle.getPropertyValue('--yellow').trim()||'#ffce28',pink:rootStyle.getPropertyValue('--pink').trim()||'#ff83bc',ink:rootStyle.getPropertyValue('--ink').trim()||'#23221e'};
+  const topSpans=$$('.ticket-top span');
+  const topLeft=(topSpans[0]?.textContent||"TODAY'S OUTFIT").trim();
+  const serial=($('#serial')?.textContent||('NO. '+String(state.spins).padStart(3,'0'))).trim();
+  const ticketTitle=($('.ticket-title')?.textContent||'抽出來的是...').trim();
+  const result=($('#result')?.textContent||'').trim();
+  const detail=($('#detail')?.textContent||'').trim();
+  const footer=($('.footer')?.textContent||'').trim();
+  const labels=$$('.head-row .head').map(el=>el.textContent.replace(/\s+/g,' ').trim().split(' ').pop()).slice(0,3);
+  const values=[state.values[0]?.[1]||'',state.values[1]?.[1]||'',state.values[2]?.[1]||''];
+
+  c.fillStyle='#fff8ec';c.fillRect(0,0,canvas.width,canvas.height);
+  c.fillStyle=colors.red;c.fillRect(0,0,canvas.width,26);
+  c.fillStyle=colors.blue;c.fillRect(0,26,canvas.width,14);
+
+  c.save();c.translate(540,140);c.rotate(-0.06);c.fillStyle='#16bb6d';roundedRect(c,-120,-48,240,96,26);c.fill();c.fillStyle=colors.ink;c.font='900 28px system-ui';c.textAlign='center';c.textBaseline='middle';drawMultiLine(c,`GOOD OUTFIT
+BETTER FRIENDS`,0,-6,180,30,2);c.restore();
+  c.save();c.translate(920,230);c.rotate(0.08);c.fillStyle=colors.pink;roundedRect(c,-110,-42,220,84,42);c.fill();c.fillStyle=colors.ink;c.font='900 24px system-ui';c.textAlign='center';c.textBaseline='middle';drawMultiLine(c,'GOOD VIBES ONLY ♡',0,0,170,28,2);c.restore();
+
+  c.fillStyle=colors.yellow;c.beginPath();c.arc(140,168,56,0,Math.PI*2);c.fill();c.fillStyle=colors.ink;c.beginPath();c.arc(122,156,4,0,Math.PI*2);c.arc(156,156,4,0,Math.PI*2);c.fill();c.lineWidth=3;c.strokeStyle=colors.ink;c.beginPath();c.arc(140,174,18,0,Math.PI,false);c.stroke();
+
+  c.fillStyle=colors.ink;c.textAlign='left';c.textBaseline='alphabetic';
+  c.font='900 40px system-ui';c.fillText('今天！',80,320);
+  c.font='900 86px system-ui';c.fillStyle=colors.red;c.fillText('好運',76,418);
+  c.font='900 98px system-ui';c.fillStyle=colors.blue;c.fillText('DressCode',76,520);
+  c.font='900 74px system-ui';c.fillStyle=colors.ink;c.fillText('拉霸',76,595);
+  c.fillStyle=colors.ink;c.font='800 34px system-ui';c.fillText((document.querySelector('.hero .banner')?.textContent||'').trim(),80,654);
+
+  // Ticket card
+  const cardX=70, cardY=720, cardW=940, cardH=500;
+  c.fillStyle=colors.yellow;roundedRect(c,cardX+16,cardY+16,cardW,cardH,26);c.fill();
+  c.fillStyle=colors.paper;roundedRect(c,cardX,cardY,cardW,cardH,26);c.fill();
+  c.lineWidth=4;c.strokeStyle=colors.ink;roundedRect(c,cardX,cardY,cardW,cardH,26);c.stroke();
+
+  // header strip
+  c.fillStyle='#ffd742';roundedRect(c,cardX,cardY,cardW,72,26);c.fill();
+  c.fillRect(cardX,cardY+36,cardW,36);
+  c.strokeStyle=colors.ink;c.setLineDash([8,7]);c.beginPath();c.moveTo(cardX,cardY+72);c.lineTo(cardX+cardW,cardY+72);c.stroke();c.setLineDash([]);
+  c.fillStyle=colors.ink;c.font='900 22px system-ui';c.textBaseline='middle';c.fillText(topLeft,cardX+24,cardY+38);c.textAlign='right';c.fillText(serial,cardX+cardW-24,cardY+38);c.textAlign='left';
+
+  c.fillStyle='#8c584c';c.font='900 24px system-ui';c.fillText(ticketTitle,cardX+28,cardY+122);
+  c.fillStyle=colors.ink;c.font='900 48px system-ui';const resultLines=wrapLines(c,result,cardW-56);resultLines.slice(0,2).forEach((line,i)=>c.fillText(line,cardX+28,cardY+182+i*54));
+  c.fillStyle='#665f57';c.font='700 22px system-ui';const detailStartY=cardY+ (resultLines.length>1? 266: 226);const detailLines=wrapLines(c,detail,cardW-56).slice(0,2);detailLines.forEach((line,i)=>c.fillText(line,cardX+28,detailStartY+i*34));
+
+  const blockY=cardY+320, blockH=54, gap=14;const fills=[colors.red,colors.blue,colors.yellow];
+  labels.forEach((label,i)=>{const y=blockY+i*(blockH+gap);c.fillStyle=fills[i];roundedRect(c,cardX+26,y,170,blockH,14);c.fill();c.fillStyle=i===2?colors.ink:'#fff9e8';c.font='900 24px system-ui';c.textBaseline='middle';c.fillText(label||['主題','配色','小物'][i],cardX+48,y+blockH/2);c.fillStyle=colors.ink;roundedRect(c,cardX+214,y,cardW-240,blockH,14);c.strokeStyle=colors.ink;c.lineWidth=3;roundedRect(c,cardX+214,y,cardW-240,blockH,14);c.fillStyle='#fff9e8';c.fill();c.stroke();c.fillStyle=colors.ink;c.font='900 28px system-ui';c.fillText(values[i],cardX+238,y+blockH/2)});
+
+  c.fillStyle='#6b5852';c.font='800 22px system-ui';c.textAlign='center';c.fillText(footer,canvas.width/2,1290);
+  return canvas;
+}
+function canvasToBlob(canvas){return new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('canvas toBlob failed')),'image/png'))}
+async function saveOutfitCard(){
+  if(!state.ready)return;
+  const canvas=outfitCardCanvas();
+  const blob=await canvasToBlob(canvas);
+  const filename='Dress_Code_好運拉霸_'+String(state.spins).padStart(3,'0')+'.png';
+  const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  if(navigator.share&&window.File){
+    const file=new File([blob],filename,{type:'image/png'});
+    try{
+      if(!navigator.canShare||navigator.canShare({files:[file]})){
+        await navigator.share({files:[file],title:document.title});
+        showToast('已開啟分享，請儲存圖片');
+        return;
+      }
+    }catch(err){if(err&&err.name==='AbortError')return;}
+  }
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=filename;a.rel='noopener';if(isIOS)a.target='_blank';
+  document.body.appendChild(a);a.click();a.remove();
+  if(isIOS){showToast('已開啟圖片，長按即可儲存')}else{showToast('穿搭卡已下載 ✳')}
+  setTimeout(()=>URL.revokeObjectURL(url),60000);
+}
+$('#save').addEventListener('click',saveOutfitCard);
 renderSoundButton();
 for(let i=0;i<3;i++)setBlank(i);
 })();
