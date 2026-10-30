@@ -158,9 +158,9 @@
     const busy=room.roundStatus==='reveal';
     const done=!!me?.done||!!me?.pending;
     const isFinish=room.phase==='finished';
-    $('#multi-reel-label').textContent=isFinish?'本次穿搭已完成':`目前抽選 · ${CATEGORIES[cat]} ／第 ${room.round} 輪`;
+    $('#multi-reel-label').textContent=isFinish?'你自己抽到的小物':`目前抽選 · ${CATEGORIES[cat]} ／第 ${room.round} 輪`;
     const face=$('#multi-reel-face');face.style.borderColor=me?.color||'#ffffff';
-    const option=isFinish?room.locked[2]?.option:me?.values[cat]?.option||null;
+    const option=me?.values[cat]?.option || (isFinish ? room.locked[2]?.option : null);
     if(me?.pending&&me.pending.slot===cat &&room.phase==='playing'){
       if(animateFor!==cat){animateFor=cat;if(animation)clearInterval(animation);
         face.classList.add('rolling');animation=setInterval(()=>{
@@ -179,7 +179,25 @@
     else if(busy){
       const summary=room.roundSummary;
       key.textContent=summary?.tied?`第 ${room.round} 輪最高票平手！全員重抽 ${CATEGORIES[cat]}。`:`最多票：${summary?.winner?.option?.[1]||''}，接下來進入下一項。`;
-    }else key.textContent=`${CATEGORIES[cat]}：${spinsDone}／${room.players.length} 人已完成${pending?'（有人正在轉盤）':''}。${done?'請等待大家抽完。':'這一輪你只能抽一次。'}`;
+    }else key.textContent=`${CATEGORIES[cat]}：${spinsDone}／${room.players.length} 人已完成${pending?'（有人正在轉盤）':''}。${done?'請等待大家抽完。':'這一輪你只能    // Preserve each player's actual roll. Identical values receive identical
+    // match colors, while independently rolled values always stay visible.
+    const matchColors=[
+      {bg:'#ffe2f1',border:'#f04aa0',ink:'#842450'},
+      {bg:'#d5f7f3',border:'#39bcb7',ink:'#185f64'},
+      {bg:'#eff9c7',border:'#a3ca38',ink:'#475a14'},
+      {bg:'#e7e0fd',border:'#ac91e9',ink:'#5a4191'},
+      {bg:'#fff0d1',border:'#e5b64e',ink:'#74500c'},
+      {bg:'#ffded4',border:'#ef8e67',ink:'#7a3925'}
+    ];
+    const matchedGroups=[0,1,2].map(slot=>{
+      const count=new Map();
+      room.players.forEach(player=>{
+        const id=player.values[slot]?.idx;
+        if(id!=null)count.set(id,(count.get(id)||0)+1);
+      });
+      const ids=[...count].filter(([,n])=>n>=2).map(([id])=>id).sort((a,b)=>a-b);
+      return new Map(ids.map((id,i)=>[id,matchColors[i%matchColors.length]]));
+    });
     const table=$('#multi-team');table.replaceChildren();
     const head=createEl('div','multi-team-head');['成員','主題','配色','小物'].forEach(x=>head.append(createEl('span','',x)));table.append(head);
     room.players.forEach(p=>{
@@ -187,9 +205,25 @@
       who.append(dot,createEl('span','',p.name+(p.id===room.viewerId?' (你)':'')));row.append(who);
       p.values.forEach((val,s)=>{
         const spinning=p.pending?.slot===s, hidden=room.roundStatus==='collecting' && s===stage && p.id!==room.viewerId;
-        const text=room.locked[s]?room.locked[s].option[1]:spinning?'轉盤中…':hidden?(p.done?'已抽完 ✓':'等待抽選'):val?val.option[1]:'—';
-        row.append(createEl('span','outcome'+(spinning?' pending':'')+(locked(s)?' matched':''),text));
+        const text=spinning?'轉盤中…':hidden?(p.done?'已抽完 ✓':'等待抽選'):val?val.option[1]:'—';
+        const outcome=createEl('span','outcome'+(spinning?' pending':''),text);
+        const group=!hidden&&!spinning&&val?matchedGroups[s].get(val.idx):null;
+        if(group){
+          outcome.classList.add('same-pick');
+          outcome.style.setProperty('--match-bg',group.bg);
+          outcome.style.setProperty('--match-border',group.border);
+          outcome.style.setProperty('--match-ink',group.ink);
+          outcome.title=CATEGORIES[s]+'：'+text+'（和其他玩家抽到一樣）';
+        }
+        if(room.locked[s] && val && !hidden){
+          outcome.title=CATEGORIES[s]+'：你實際抽到 '+text+(room.locked[s].idx===val.idx?'（這項票選勝出）':'（這項的共同穿搭另由票選決定）');
+        }
+        row.append(outcome);
       });table.append(row);
+    });
+    const note=createEl('div','multi-match-note','同色底表示抽到同款；每個人的結果都會保留，最終穿搭另由票選決定。');
+    table.append(note);
+
     });
     // Same on-page result ticket, actions, text and image exporter as the solo game.
     const ticket=$('#multi-ticket');ticket.hidden=!isFinish;
